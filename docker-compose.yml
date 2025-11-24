@@ -1,7 +1,8 @@
 services:
   php:
     build:
-      context: ./docker/php
+      context: .
+      dockerfile: ./docker/php/Dockerfile
     container_name: php
     volumes:
       - ./storyteller:/var/www

@@ -12,3 +12,11 @@ RUN pecl install redis \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
+
+COPY storyteller/composer.json storyteller/composer.lock ./
+
+RUN composer install --no-scripts --no-interaction
+COPY storyteller/. .
+RUN composer dump-autoload --optimize
+RUN composer require neo4j/neo4j-bundle
+RUN composer require predis/predis
