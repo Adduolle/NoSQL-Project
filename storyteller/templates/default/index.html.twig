@@ -5,6 +5,33 @@
     <title>Accueil</title>
 </head>
 <body>
-    <h1>Accueil</h1>
+    {% if user_id is defined %}
+        <p>A ENLEVER APRES DEBUG</p>
+        <p>Your ID: <strong>{{ user_id }}</strong></p>
+    {% endif %}
+    <hr />
+
+    {% if username is defined and username %}
+        <p>Current username: <strong>{{ username }}</strong></p>
+    {% endif %}
+
+    {% if success is defined and success %}
+        <p style="color:green">{{ success }}</p>
+    {% endif %}
+    {% if error is defined and error %}
+        <p style="color:red">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" action="{{ path('homepage') }}">
+        <label for="username">Username (letters, numbers, - and _ only):</label>
+        <input id="username" name="username" type="text" value="{{ username|default('') }}" />
+        <button type="submit">Link username</button>
+    </form>
+
+    <div style="margin-top:20px">
+        <a href="{{ path('create_game') }}" role="button">Create game</a>
+        &nbsp;|&nbsp;
+        <a href="{{ path('join_game') }}" role="button">Join game</a>
+    </div>
 </body>
 </html>
