@@ -1,5 +1,5 @@
 
-/* VARIABLES GLOBALES (PALETTE DE COULEUR) */
+/* 1. VARIABLES GLOBALES (PALETTE DE COULEUR) */
 
 :root{
     --couleur-turquoise-claire:#65C1BC;        /*principal background */
@@ -18,11 +18,11 @@
 
 
 
-/*STYLES DE BASE ET FOND À MOTIF */
+/* 2 .STYLES DE BASE ET FOND À MOTIF */
 
 body {
     /* Couleur de fond principal et typographie de base */
-    background-color: var(--couleur-turquoise-clair);
+    background-color: #65C1BC;
     color: var(--couleur-texte-sombre);
     font-family: var(--police-corps);
     min-height: 100vh; 
@@ -30,42 +30,40 @@ body {
 }
 
 
+
+
 .main-wrapper::before {
     content: "";
     position: fixed; /* Fixe le motif des lettres au fond de la fenêtre */
-    top: 0;
+  top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: -1; /* Envoi à l'arrière-plan */
     
-    background-image: url('NoSQL-Project\storyteller\templates\structure\fondo-patron-alfabeto -SANS BACKGROUND.png');
+background-image: url('fondo-patron-alfabeto -SANS BACKGROUND.png');
     background-repeat: repeat; /* Répétition de l'image dans les deux directions */
-    background-size: 200px auto; /* Ajuste la taille du motif */
+   background-size: 800px auto; /* Ajuste la taille du motif */
     
     /* Effets de flou et de faible opacité */
-    opacity: 0.15; /* Transparence subtile */
-    filter: blur(2px); /* Légèrement flou */
+  opacity: 0.06; /* Transparence subtile */
+   filter: blur(0.5px); /* Légèrement flou */
 }
 
 
 
 
-/* STYLES DE LA NAVBAR */
+/* 3. STYLES DE LA NAVBAR */
 
 .navbar {
     background-color: var(--couleur-fond-navbar) !important; /* Totalement transparent */
     border: none;
-    padding-top: 1.5rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Style du Logo "TaleRoom" dans la barre de navegation*/
-.navbar-brand.logo {
-    font-family: var(--police-titre);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--couleur-texte-sombre) !important;
-}
+
 
 /* Style de l'Icône d'Utilisateur et Surnom */
 .user-profile a {
@@ -88,7 +86,7 @@ body {
 
 
 
-/*STYLES DE LA SECTION HERO ET LOGO CENTRAL */
+/* 4. STYLES DE LA SECTION HERO ET LOGO CENTRAL */
 
 .hero-content-center {
     min-height: calc(100vh - 100px); 
@@ -115,7 +113,7 @@ body {
 
 
 
-/*STYLES DES BOUTONS CENTRAUX (CTA BOX)= call to action box */
+/* 5. STYLES DES BOUTONS CENTRAUX (CTA BOX)= call to action box */
 
 
 /* Style général pour les "boîtes" des boutons */
@@ -124,6 +122,7 @@ body {
     width: 280px; 
     height: 140px;
     padding: 20px;
+    font-size: 1rem; /* Tamaño base para el texto pequeño */
     
     /* Format */
     border: none;
@@ -137,17 +136,25 @@ body {
     text-decoration: none !important; 
     
     /* Ombre et Transition */
-    box-shadow: 0px 8px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 7px 0px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
     
     /* Centrage du texte dans le bouton */
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+}
+
+/* Style pour la première ligne du texte du bouton */
+.cta-box-button .cta-large-text {
+    font-size: 1.6rem; /* Taille plus grand */
+    font-weight: 900;  /* plus gros pour resalter */
+    line-height: 1.2;    /* Ajustamos el line-height para que no haya demasiado espacio antes del <br> */
 }
 
 /* Couleur du bouton primaire et secondaire (Vert vif) */
-.primary-cta-box, .secondary-cta-box {
+.primary-cta-box {
     background-color: var(--couleur-vert-vif);
     color: var(--couleur-texte-sombre);
 }
@@ -165,3 +172,5 @@ body {
     box-shadow: none !important;
     outline: none !important;
 }
+
+
