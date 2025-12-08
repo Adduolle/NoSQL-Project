@@ -1,57 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taleroom -prac</title>
- 
+{# 
+    Ce fichier étend généralement un template de base pour hériter 
+    du <head> (titre, charset) et du <footer>/scripts de base.
+    
+    Si ce template est le point d'entrée principal sans héritage, 
+    vous pouvez garder la structure complète (comme ci-dessous)
+    ou la transformer en 'base.html.twig' et l'étendre.
+#}
+
+{% extends 'base.html.twig' %} {# REMPLACEZ 'base.html.twig' par le nom de votre fichier de base #}
+
+{% block title %}TaleRoom - Accueil{% endblock %}
+
+{# 
+    Définition des blocs pour les liens CSS et Favicons si le template de base
+    ne les inclut pas automatiquement.
+#}
+{% block stylesheets %}
+    {# Lien vers Bootstrap (Souvent géré par le base.html.twig) #}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
-    <link rel="stylesheet" href="styles.css">
+    
+    {# Votre CSS personnalisé (le chemin 'assets/styles.css' est un exemple de convention) #}
+    <link rel="stylesheet" href="{{ asset('styles.css') }}">
 
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" href="logo.png" type="image/png"> 
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    {# Favicons: Utilisation de la fonction asset() pour pointer vers les fichiers dans /public #}
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('logo.png') }}" type="image/png"> 
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+{% endblock %}
 
-</head>
-<body>
+{% block body %}
     <div class="main-wrapper">
 
-        <!--barre de navegation-->
         <header class="main-header">
             <nav class="navbar navbar-expand-sm navbar-light p-4">
-                <a href="#"><img src="TaleRoom(1).png" alt="TaleRoom"></a>
+                {# Utilisation de la fonction asset() pour l'image du logo dans la navbar #}
+                <a class="navbar-brand" href="{{ path('app_home') }}">
+                    <img src="{{ asset('TaleRoom(1).png') }}" alt="TaleRoom">
+                </a>
 
+                {# Utilisation de ml-auto pour pousser le profil à droite #}
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-items user-profile">
-
-                            <a class="nav-link" href="/profile">
+                    <li class="nav-item user-profile">
+                        {# La route doit être définie dans Symfony #}
+                        <a class="nav-link" href="{{ path('app_profile') }}">
                             <span class="user-icon"></span> 
-                            Nickname
+                            {# Variable Twig pour le Nickname, supposons que 'app.user.nickname' existe #}
+                            {{ app.user ? app.user.nickname : 'Nickname' }}
                         </a>
-                        
                     </li>
-                </ul>    
+                </ul> 
             </nav>
         </header>
 
         <main class="container-fluid hero-content-center d-flex justify-content-center align-items-center flex-column">
+            
+            {# Logo Central #}
             <div class="logotype-central mb-5">
-                <img src="TaleRoom.png" alt="TaleRoom">
+                <img src="{{ asset('TaleRoom.png') }}" alt="TaleRoom">
             </div>
             
+            {# Boutons CTA Centraux #}
             <div class="row w-100 justify-content-center main-cta-row">
-                 <!--creer une nouvelle histoire-->
+                
+                {# Créer une nouvelle histoire #}
                 <div class="col-12 col-md-4 mb-3 mb-md-0 d-flex justify-content-center">
-                    <a href="/new-story" class="btn cta-box-button primary-cta-box">
-                       <span class="cta-large-text"> Creer</span>
+                    <a href="{{ path('app_new_story') }}" class="btn cta-box-button primary-cta-box">
+                        <span class="cta-large-text"> Créer</span>
                         une nouvelle histoire
                     </a>
                 </div>
 
-                <!--Rejoindre a une nouvelle histoire--> 
+                {# Rejoindre une histoire avec code #}
                 <div class="col-12 col-md-4 d-flex justify-content-center">
-                    <a href="/join-code" class="btn cta-box-button primary-cta-box">
-                       <span class="cta-large-text">  Rejoindre</span>
+                    <a href="{{ path('app_join_code') }}" class="btn cta-box-button primary-cta-box">
+                        <span class="cta-large-text"> Rejoindre</span>
                         une histoire avec code
                     </a>
                 </div>
@@ -60,11 +82,21 @@
         </main>
 
         <footer class="main-footer">
+            {# Contenu du pied de page #}
         </footer>
         
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S30/35+p7+LqY1B+hL1FfM7fR+I7o2U6q+y2L" crossorigin="anonymous"></script>
-</body>
-</html>
+    {# 
+        Les scripts sont généralement placés dans le footer du base.html.twig
+        pour le chargement optimal (voir explication précédente).
+        Si vous n'avez pas de base, décommentez les lignes suivantes:
+    #}
+    
+    {# 
+    {% block javascripts %}
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S30/35+p7+LqY1B+hL1FfM7fR+I7o2U6q+y2L" crossorigin="anonymous"></script>
+    {% endblock %}
+    #}
+{% endblock %}
