@@ -11,7 +11,7 @@ class Neo4jService
     public function __construct()
     {
         $this->client = ClientBuilder::create()
-            ->withDriver('neo4j', 'neo4j://localhost:7687', 'neo4j', 'neo4j1234') // ton login
+            ->withDriver('neo4j', 'neo4j://localhost:7474', 'neo4j', 'neo4j1234')
             ->build();
     }
 

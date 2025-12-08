@@ -17,8 +17,6 @@ class UserController
     }
 
 
-
-    //Creer un joueur
     #[Route('/user', name: 'app_user_create', methods: ['GET'])]
     public function createUser(Request $request): Response
     {
@@ -43,12 +41,6 @@ class UserController
 
         return new Response("User $name created");
     }
-
-
-    $createPlayer = '
-        CREATE (u:User {id: $userId, name: $nameId})
-        RETURN u;
-    ';
 
     #[Route('/game', name: 'create_game', methods: ['GET'])]
     public function createGame(Request $request): Response
@@ -81,7 +73,7 @@ class UserController
     }
 
 
-    //créer une story dans game
+
     #[Route('/story', name: 'app_story_create', methods: ['POST'])]
     public function createStory(Request $request): Response
     {
