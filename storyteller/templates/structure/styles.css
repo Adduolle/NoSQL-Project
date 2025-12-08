@@ -8,12 +8,13 @@
     --couleur-fond-navbar:#84D7D2;          /*couleur de la barre de navegation */
 
     /* ----Couleurs de texte et éléments sombres ----*/
-    --couleur-texte-sombre: #1E1E2F;             /* Bleu Marine Foncé */
+    --couleur-texte-sombre: #221F1F;             /* Bleu Marine Foncé */
     --couleur-motif-sombre: #000000;             /* Couleur de base du motif de lettres */
     
     /*---- Typographie-----*/
-    --police-titre: 'Poppins', sans-serif;
-    --police-corps: 'Open sans', sans-serif;
+    --police-titre: 'Open Sans', sans-serif;
+    --police-corps: 'Open Sans', sans-serif;
+    
 }
 
 
@@ -41,9 +42,9 @@ body {
     height: 100%;
     z-index: -1; /* Envoi à l'arrière-plan */
     
-background-image: url('fondo-patron-alfabeto -SANS BACKGROUND.png');
+    background-image: url('fondo-patron-alfabeto -SANS BACKGROUND.png');
     background-repeat: repeat; /* Répétition de l'image dans les deux directions */
-   background-size: 800px auto; /* Ajuste la taille du motif */
+    background-size: 800px auto; /* Ajuste la taille du motif */
     
     /* Effets de flou et de faible opacité */
   opacity: 0.06; /* Transparence subtile */
