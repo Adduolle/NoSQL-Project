@@ -19,4 +19,3 @@ RUN composer install --no-scripts --no-interaction
 COPY storyteller/. .
 RUN composer dump-autoload --optimize
 RUN composer require neo4j/neo4j-bundle --no-interaction
-RUN composer require predis/predis
