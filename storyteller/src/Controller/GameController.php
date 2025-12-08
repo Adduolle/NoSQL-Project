@@ -19,4 +19,12 @@ class GameController extends AbstractController
     {
         return $this->render('default/join_game.html.twig');
     }
+
+    /*#[Route('/game/{gameId}', name: 'manches')]
+    public function manches(string $gameId): Response
+    {
+        return $this->render('game/manches.html.twig', [
+            'gameId' => $gameId,
+        ]);
+    }*/
 }
