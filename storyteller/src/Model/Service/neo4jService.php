@@ -1,5 +1,5 @@
 <?php
-namespace App\Service;
+namespace App\Model\Service;
 
 use GraphAware\Neo4j\Client\ClientBuilder;
 use GraphAware\Neo4j\Client\ClientInterface;

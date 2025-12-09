@@ -1,6 +1,6 @@
 <?php
 
-use App\Service;
+use App\Model\Service;
 use GraphAware\Neo4j\Client\ClientBuilder;
 use GraphAware\Neo4j\Client\ClientInterface;
 use Symfony\Component\HttpFoundation\Request;
