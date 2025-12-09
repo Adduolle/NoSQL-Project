@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class GameManager
 {
+
     public function getNextRoundId(string $gameId, int $RoundNumber,string $playerId): string
     {
         //todo use redis

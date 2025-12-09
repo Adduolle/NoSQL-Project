@@ -1,17 +1,19 @@
 <?php
 namespace App\Controller;
 
+use App\Service\GameManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class GameLoopController extends AbstractController
 {
-    #[Route('/in_game', name: 'get_in_game')]
-    public function createNormalRoom(): Response
+    private GameManager $gm;
+
+    #[Route('/start_game', name: 'start_game_loop')]
+    public function gameLoop(): Response
     {
-        $player_count=8; //TODO get player count from game manager
-        $rounds=[]; //TODO get rounds from game manager and game type
+        $this->gm->createGame();
         $this->render('first_game.html.twig');
         while (true){
             //TODO for each round

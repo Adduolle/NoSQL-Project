@@ -1,17 +1,14 @@
 <?php
 
-use App\Service;
-use GraphAware\Neo4j\Client\ClientBuilder;
-use GraphAware\Neo4j\Client\ClientInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class UserController
 {
-    private Neo4jService $neo4j;
+    private Neo4JService $neo4j;
 
-    public function __construct(Neo4jService $neo4j)
+    public function __construct(Neo4JService $neo4j)
     {
         $this->neo4j = $neo4j;
     }
