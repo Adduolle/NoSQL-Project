@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Taleroom{% endblock %}</title>
+
+    {# Bootstrap depuis CDN #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+    {# CSS local via asset() #}
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+
+    {# Google Fonts #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <div class="main-wrapper">
+        <!-- Barre de navigation -->
+        <header class="main-header">
+            <nav class="navbar navbar-expand-sm navbar-light p-4">
+                <a href="#"><img src="{{ asset('image/logo.png') }}" alt="TaleRoom"></a>
+                <ul class="navbar-nav ml-auto">
+                                        
+                </ul>    
+            </nav>
+        </header>
+
+        <main class="container-fluid hero-content-center d-flex justify-content-center align-items-center flex-column">
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="main-footer">
+            {% block footer %}{% endblock %}
+        </footer>
+    </div>
+
+    {# JS Bootstrap depuis CDN #}
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3dMtoQ2FKjFfT3r5K4p5Lj4wVZ+0xJZ0xJZ0xJZ0xJZ0xJZ0xJZ0xJZ0xJZ" crossorigin="anonymous"></script>
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>
