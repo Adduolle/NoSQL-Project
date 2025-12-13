@@ -42,7 +42,7 @@ class PlayerManager
             $cacheKey = 'player_token_' . hash('sha256', $token);
             $item = $this->cache->getItem($cacheKey);
             if (!$item->isHit()) {
-                $legacyKey = 'player_token:' . $token;
+                $legacyKey = 'player_token_' . $token;
                 $legacyItem = $this->cache->getItem($legacyKey);
                 if ($legacyItem->isHit()) {
                     $data = $legacyItem->get();

@@ -18,7 +18,7 @@
 
     <div id="host-actions" style="display:none;">
         <em>Vous êtes l'host de la partie</em>
-        <form method="post" action="{{ path('start_game', {'roomId': room.id}) }}">
+        <form method="post" action="{{ path('start_game', {'roomId': roomID}) }}">
             <button type="submit">Start Game</button>
         </form>
     </div>

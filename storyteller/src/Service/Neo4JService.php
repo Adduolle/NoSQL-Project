@@ -1,8 +1,8 @@
 <?php
 namespace App\Service;
 
-use GraphAware\Neo4j\Client\ClientBuilder;
-use GraphAware\Neo4j\Client\ClientInterface;
+use Laudis\Neo4j\ClientBuilder;
+use Laudis\Neo4j\Contracts\ClientInterface;
 
 class Neo4JService
 {
@@ -11,7 +11,7 @@ class Neo4JService
     public function __construct()
     {
         $this->client = ClientBuilder::create()
-            ->withDriver('neo4j', 'neo4j://localhost:7474', 'neo4j', 'neo4j1234')
+            ->withDriver('default', 'bolt://neo4j:password@neo4j:7687')
             ->build();
     }
 

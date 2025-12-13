@@ -1,10 +1,12 @@
 <?php
 
+namespace App\Service;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class UserController
+class Requests
 {
     private Neo4JService $neo4j;
 
