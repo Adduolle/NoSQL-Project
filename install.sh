@@ -12,6 +12,13 @@ docker compose up -d
 echo "Installation des dépendances Symfony dans le conteneur PHP..."
 docker compose exec php composer install
 
+# Créer un .env minimal si absent
+if [ ! -f .env ]; then
+  echo "Création d'un .env minimal..."
+  cp docker/.env.minimal .env
+fi
+
+
 # Afficher l’état des conteneurs
 echo "Voici l’état des conteneurs :"
 docker compose ps
