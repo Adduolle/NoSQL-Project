@@ -14,6 +14,7 @@ return [
         '/join_game' => [[['_route' => 'join_game', '_controller' => 'App\\Controller\\Controller::joinGame'], null, null, null, false, false, null]],
         '/neo4j-test' => [[['_route' => 'test-neo4j', '_controller' => 'App\\Controller\\Controller::index'], null, null, null, false, false, null]],
         '/' => [[['_route' => 'homepage', '_controller' => 'App\\Controller\\HomeController::index'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        '/testtwig' => [[['_route' => 'test_twig', '_controller' => 'App\\Controller\\TestTwigController::index'], null, null, null, false, false, null]],
     ],
     [ // $regexpList
         0 => '{^(?'

@@ -15,17 +15,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Définir le répertoire de travail
 WORKDIR /var/www
 
+COPY storyteller/composer.json ./
+
+# Installer toutes les dépendances exactement comme dans composer.lock
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer require symfony/asset:^7.3
+
 # Copier le projet
 COPY storyteller/ ./
-
-# Installer les dépendances PHP sans exécuter les scripts Symfony auto
-RUN composer require \
-    symfony/security-bundle \
-    laudis/neo4j-php-client \
-    --no-interaction --no-scripts
-
-# Installer toutes les dépendances depuis composer.lock
-RUN composer install --no-interaction --optimize-autoloader --no-scripts
-
-# Optimiser l’autoload
-RUN composer dump-autoload --optimize

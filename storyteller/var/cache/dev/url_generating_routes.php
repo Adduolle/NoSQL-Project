@@ -11,6 +11,7 @@ return [
     'join_game' => [[], ['_controller' => 'App\\Controller\\Controller::joinGame'], [], [['text', '/join_game']], [], [], []],
     'test-neo4j' => [[], ['_controller' => 'App\\Controller\\Controller::index'], [], [['text', '/neo4j-test']], [], [], []],
     'homepage' => [[], ['_controller' => 'App\\Controller\\HomeController::index'], [], [['text', '/']], [], [], []],
+    'test_twig' => [[], ['_controller' => 'App\\Controller\\TestTwigController::index'], [], [['text', '/testtwig']], [], [], []],
     'App\Controller\Controller::createNormalRoom' => [[], ['_controller' => 'App\\Controller\\Controller::createNormalRoom'], [], [['text', '/waitroom/normal_game']], [], [], []],
     'App\Controller\Controller::createPathRoom' => [[], ['_controller' => 'App\\Controller\\Controller::createPathRoom'], [], [['text', '/waitroom/path_game']], [], [], []],
     'App\Controller\Controller::roomPlayers' => [['id'], ['_controller' => 'App\\Controller\\Controller::roomPlayers'], [], [['text', '/players'], ['variable', '/', '[^/]++', 'id', true], ['text', '/waitroom']], [], [], []],
@@ -18,4 +19,5 @@ return [
     'App\Controller\Controller::joinGame' => [[], ['_controller' => 'App\\Controller\\Controller::joinGame'], [], [['text', '/join_game']], [], [], []],
     'App\Controller\Controller::index' => [[], ['_controller' => 'App\\Controller\\Controller::index'], [], [['text', '/neo4j-test']], [], [], []],
     'App\Controller\HomeController::index' => [[], ['_controller' => 'App\\Controller\\HomeController::index'], [], [['text', '/']], [], [], []],
+    'App\Controller\TestTwigController::index' => [[], ['_controller' => 'App\\Controller\\TestTwigController::index'], [], [['text', '/testtwig']], [], [], []],
 ];
