@@ -45,7 +45,7 @@ class HomeController extends AbstractController
             }
         }
 
-        $response = $this->render('default/index.html.twig', [
+        $response = $this->render('index.html.twig', [
             'user_id' => $token,
             'username' => $currentUsername,
             'error' => $error,
