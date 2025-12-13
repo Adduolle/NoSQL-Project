@@ -1,23 +1,20 @@
 <?php
 
-use App\Service;
-use GraphAware\Neo4j\Client\ClientBuilder;
-use GraphAware\Neo4j\Client\ClientInterface;
+namespace App\Service;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class UserController
+class Requests
 {
-    private Neo4jService $neo4j;
+    private Neo4JService $neo4j;
 
-    public function __construct(Neo4jService $neo4j)
+    public function __construct(Neo4JService $neo4j)
     {
         $this->neo4j = $neo4j;
     }
 
-
-    #[Route('/user', name: 'app_user_create', methods: ['GET'])]
     public function createUser(Request $request): Response
     {
         $userId = $request->query->get('userId');
@@ -42,7 +39,6 @@ class UserController
         return new Response("User $name created");
     }
 
-    #[Route('/game', name: 'create_game', methods: ['GET'])]
     public function createGame(Request $request): Response
     {
         $gameId = $request->query->get('gameId');
@@ -72,9 +68,6 @@ class UserController
         return new Response("Game $gameId created with players: " . implode(',', $userIds));
     }
 
-
-
-    #[Route('/story', name: 'app_story_create', methods: ['POST'])]
     public function createStory(Request $request): Response
     {
         $gameId = $request->request->get('gameId');
@@ -101,8 +94,6 @@ class UserController
         return new Response("Story $storyId created in game $gameId");
     }
 
-
-    #[Route('/script', name: 'app_script_create', methods: ['POST'])]
     public function createScript(Request $request): Response
     {
         $storyId = $request->request->get('storyId');
@@ -134,7 +125,7 @@ class UserController
 
         return new Response("Script $scriptId added to story $storyId");
     }
-    #[Route('/script/send', name: 'app_script_send', methods: ['POST'])]
+
     public function sendScript(Request $request): Response
     {
         $scriptId = $request->request->get('scriptId');

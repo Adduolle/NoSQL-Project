@@ -1,39 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Accueil</title>
-</head>
-<body>
-    {% if user_id is defined %}
-        <p>A ENLEVER APRES DEBUG</p>
-        <p>Your ID: <strong>{{ user_id }}</strong></p>
-    {% endif %}
-    <hr />
+{% extends 'base.html.twig' %}
 
-    {% if username is defined and username %}
-        <p>Current username: <strong>{{ username }}</strong></p>
-    {% endif %}
+{% block title %}Taleroom - Accueil{% endblock %}
+{% block body %}
+        <main class="container-fluid  align-items-center">
+           
+            
+            <div class="row justify-content-center align-items-center vh-100">
+                 <!--creer une nouvelle histoire-->
+                <div class="col-12 col-sm-10 col-md-10 col-lg-6 col-xl-6 text-center justify-content-center">
 
-    {% if success is defined and success %}
-        <p style="color:green">{{ success }}</p>
-    {% endif %}
-    {% if error is defined and error %}
-        <p style="color:red">{{ error }}</p>
-    {% endif %}
+                     <div class="logo">
+                        <img src="{{ asset('images/TaleRoom-home.png')}}"   alt="image logotype de TaleRoom">
+                     </div>
 
-    <form method="post" action="{{ path('homepage') }}">
-        <label for="username">Username (letters, numbers, - and _ only):</label>
-        <input id="username" name="username" type="text" value="{{ username|default('') }}" />
-        <button type="submit">Link username</button>
-    </form>
+                    <div class="card tale-room-card-home p-2 shadow-lg">
+                        <div class="card-body">
+                            <h3 class="card-title mb-4 tale-room-title">Créer une nouvelle histoire</h3>
 
-    <div style="margin-top:20px">
-        <a href="{{ path('create_game/normal') }}" role="button">Create normal game</a>
-        &nbsp;|&nbsp;
-        <a href="{{ path('create_game/path') }}" role="button">Create path game</a>
-        &nbsp;|&nbsp;
-        <a href="{{ path('join_game') }}" role="button">Join game</a>
-    </div>
-</body>
-</html>
+                            <div class="d-flex justify-content-around mb-5">
+                                <button class="btn cta-box-button primary-cta-box" onclick="location.href='#'">
+                                    Histoire Classique
+                                </button>
+                                <button class="btn cta-box-button primary-cta-box" onclick="location.href='#'">
+                                    Histoire en Loop
+                                </button>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                    <div class="join-section">
+                        <h3 class="mb-2 join-text">Rejoindre une partie :</h3>
+
+                            <form action="/join-game" method="post" class="d-flex flex-column align-items-center">
+                                <input type="text" class="form-control-lg input-code mb-3" placeholder="Entrer le code d'invitation" name="gameCode" required>
+                           
+                                <button type="submit" class="btn tale-room-btn">
+                                    Enter
+                                </button>
+                            </form>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+{% endblock %}

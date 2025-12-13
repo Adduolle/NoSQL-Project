@@ -1,0 +1,283 @@
+
+/* 1. VARIABLES GLOBALES (PALETTE DE COULEUR) */
+
+:root{
+    --couleur-turquoise-claire:#65C1BC;        /*principal background */
+    --couleur-vert-vif: #55F96E;       /* Couleur des boutons */
+    --couleur-vert-foncé: #158e27;      /*Couleur des nom joueurs*/
+    --couleur-ombre-logo: #C19934;     /* Orange/Jaune pour l'ombre du logo */
+    --couleur-fond-navbar:#84D7D2;          /*couleur de la barre de navegation */
+    --couleur-fond-histoires: #D9D9D9;       /*couleur de fond des histoires deja construits */
+    /* ----Couleurs de texte et éléments sombres ----*/
+    --couleur-texte-sombre: #1E1E2F;             /* Bleu Marine Foncé */
+    --couleur-motif-sombre: #000000;             /* Couleur de base du motif de lettres */
+    
+    /*---- Typographie-----*/
+    --police-titre: "Open sans", sans-serif;
+    --police-corps: "Open sans", sans-serif;
+    --police-bottoms: "Indie Flower", cursive;
+}
+
+
+
+/* 2 .STYLES DE BASE ET FOND À MOTIF */
+
+body {
+    /* Couleur de fond principal et typographie de base */
+    background-color: #65C1BC;
+    color: var(--couleur-texte-sombre);
+    font-family: var(--police-corps);
+    min-height: 100vh; 
+    margin: 0;
+}
+
+
+
+
+.main-wrapper::before {
+    content: "";
+    position: fixed; /* Fixe le motif des lettres au fond de la fenêtre */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Envoi à l'arrière-plan */
+    
+    background-image: url('../images/alphabet.png');
+    background-repeat: repeat; /* Répétition de l'image dans les deux directions */
+    background-size: 800px auto; /* Ajuste la taille du motif */
+    
+    /* Effets de flou et de faible opacité */
+    opacity: 0.06; /* Transparence subtile */
+    filter: blur(0.5px); /* Légèrement flou */
+}
+
+
+
+
+/* 3. STYLES DE LA NAVBAR */
+
+.navbar {
+    background-color: var(--couleur-fond-navbar) !important; /* Totalement transparent */
+    border: none;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* Style de l'Icône d'Utilisateur et Surnom */
+.user-profile a {
+    color: var(--couleur-texte-sombre);
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex; /* Pour aligner l'icône et le texte */
+    align-items: center;
+}
+
+/* Conteneur de l'icône utilisateur */
+.user-profile .user-icon {
+    margin-right: 8px;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+}
+
+
+
+
+/* 4. STYLES DE LA SECTION HERO ET LOGO CENTRAL */
+
+.hero-content-center {
+    min-height: calc(100vh - 100px); 
+    padding-top: 50px;   
+}
+
+h3{
+    text-align: center;
+}
+
+
+/* 5. STYLES DES BOUTONS CENTRAUX HOME (CTA BOX)= call to action box */
+
+
+/* Style général pour les "boîtes" des boutons */
+.cta-box-button {
+    /* Dimensions et mise en page */
+    width: 280px; 
+    height: 120px;
+    padding: 10px;
+    font-size: 1rem; /* Tamaño base para el texto pequeño */
+    margin:0 10px;
+    margin-bottom: 0px;
+  
+    border: none;
+    border-radius: 20px;
+    
+    /* Typographie */
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none !important; 
+    
+    /* Ombre et Transition */
+    box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    
+    /* Centrage du texte dans le bouton */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    background-color: var(--couleur-vert-vif);
+    color: var(--couleur-texte-sombre);
+
+    
+}
+
+/* Effet au survol (Hover State) */
+.cta-box-button:hover {
+    transform: translateY(5px); 
+    box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.1);
+    color: var(--couleur-texte-sombre); 
+    text-decoration: none;
+}
+
+/* Annule le focus de Bootstrap */
+.btn:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.tale-room-card-home {
+    border-radius: 10px;
+    background-color:var(--couleur-fond-navbar) ;
+    box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5rem);
+    margin: 20px;
+
+
+}
+.card-body{
+    padding-bottom: 0px;
+}
+
+.input-code{
+    margin: 5px;
+    border-radius: 30px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* 6. STYLES DE RESULTAT-HISTOIRE  */
+
+
+.tale-room-card {
+    border-radius: 2px;
+    background-color:var(--couleur-fond-histoires);
+    padding: 15px;
+}
+
+.title-name{
+    text-align: center;
+    margin-bottom: 20px;
+    color: var( --couleur-vert-foncé);
+}
+
+/* titre histoire  */
+
+.player-name {
+    font-weight:600;
+    color: var( --couleur-texte-sombre);
+    margin-bottom: 4px;
+}
+
+/* separateur des histoires  */
+.story-item {
+   
+    padding: 10px 10px !important;
+    position: relative;
+    overflow: hidden; /* pour que le separateur ne se sorte pas */
+
+}
+
+
+/* --- Botón "Voir suivant" --- */
+.tale-room-btn {
+    color: var( --couleur-texte-sombre);
+    background-color: #FECC51  ;
+    border-color: #C19934;
+    border-width: 3px;
+    font-weight: 700;
+    padding: 5px 20px;
+    border-radius: 10px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 15px;
+    font-family: var(--police-bottoms);
+    font-size: 22px;
+}
+
+.tale-room-btn:hover {
+    background-color: #e0a800; 
+    border-color: #e0a800;
+    transform: translateY(-1px); /* Opcional: Levanta ligeramente el botón */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Sombra un poco más grande */
+}
+
+
+/* Barre de déplacement (Scroller) */
+
+ 
+
+.scrollable-content { /* Barre de déplacement des histories finaux */
+    
+    max-height: 380px; /* hauteur maximal avant que la barre apparaisse*/
+    overflow-y: auto;  /* force l'aparition de la barra de deplacement*/
+    padding: 15px; 
+    scrollbar-width: thin;
+    scrollbar-color: #919594 #f0f0f0;
+}
+
+
+.scrollable-content-stories { /* Barre de déplacement des histories en train de se construire */
+    
+    max-height: 180px; /* hauteur maximal avant que la barre apparaisse*/
+    min-height: 180px;
+    overflow-y: auto;  /* force l'aparition de la barra de deplacement*/
+    padding: 10px; 
+    scrollbar-width: thin;
+    scrollbar-color: #919594 #f0f0f0;
+}
+
+
+.title-suite{
+    text-align: center;
+    margin: 20px;
+    font-size: 30px;
+}
+
+
+
+
+/* 7. PAGE HISTORIES AU MOMENT DE LA ÉCRITURE*/
+
+.tale-room-textarea{
+    border: rgba(255,255,255,0.8);
+    border-radius: 25px;
+    border: 1px solid #d8db8c;
+    padding: 15px;
+    size: 50px;
+    width: 160%;
+    margin-left: -29%;
+}
+
+
+.story-text{
+    font-size: medium;
+    font-family: var(--police-corps);
+}
