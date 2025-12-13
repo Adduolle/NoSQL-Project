@@ -10,5 +10,6 @@
 ```
 git clone https://github.com/Adduolle/NoSQL-Project.git
 cd nosql-project
+chmod +x install.sh
 install.sh
 ```
