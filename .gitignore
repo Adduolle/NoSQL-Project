@@ -8,6 +8,7 @@
 /app/spool/*
 
 # Cache, session files and logs (Symfony3)
+/var/
 /var/cache/*
 /var/logs/*
 /var/sessions/*
@@ -50,13 +51,3 @@
 
 # Embedded web-server pid file
 /.web-server-pid
-
-###> symfony/framework-bundle ###
-storyteller/.env.local
-storyteller/.env.local.php
-storyteller/.env.*.local
-storyteller/config/secrets/prod/prod.decrypt.private.php
-storyteller/public/bundles/
-storyteller/var/
-storyteller/vendor/
-###< symfony/framework-bundle ###
