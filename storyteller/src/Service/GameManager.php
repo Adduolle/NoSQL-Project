@@ -8,6 +8,14 @@ use Symfony\Component\HttpFoundation\Request;
 
 class GameManager
 {
+    private RequetesRedis $requetesRedis;
+    private RequetesNeo4j $requetesNeo4j;
+
+    public function __construct()
+    {
+        $this->requetesRedis = new RequetesRedis();
+        $this->requetesNeo4j = new RequetesNeo4j();
+    }
 
     //public function getNextRoundId(string $gameId, int $RoundNumber,string $playerId): string
     //{
@@ -29,5 +37,8 @@ class GameManager
         //todo create the list of script in order 
     }
 
-
+    public function setRoomType(string $roomType): void
+    {
+         $this->requetesRedis->createParty($roomType, "test"); 
+    }
 }

@@ -19,20 +19,29 @@ class Controller extends AbstractController
     #[Route('/waitroom/normal_game', name: 'create_waitroom_normal')]
     public function createNormalRoom(): Response
     {
-        $room=$this->gameManager->setRoomType("normal");
+        if (!isset($this->gameManager)) {
+            $this->gameManager = new GameManager();
+        }           
+        $room = $this->gameManager->setRoomType("normal");
         return $this->render('waitroom.html.twig',[]); //passer params
     }
 
     #[Route('/waitroom/path_game', name: 'create_waitroom_path')]
     public function createPathRoom(): Response
     {
-        $room=$this->gameManager->setRoomType("path");
+        if (!isset($this->gameManager)) {
+            $this->gameManager = new GameManager();
+        }   
+        $room = $this->gameManager->setRoomType("path");
         return $this->render('waitroom.html.twig',[]); //passer params
     }
 
     #[Route('/waitroom/{id}/players', name: 'room_players')]
     public function roomPlayers(): JsonResponse
     {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
         $players = [];
 
         foreach ($this->gameManager->getPlayers() as $player) {
@@ -49,6 +58,9 @@ class Controller extends AbstractController
     #[Route('/game_loop', name: 'game_loop')]
     public function gameLoop(): Response
     {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
         $this->render('first_game.html.twig',[]); //passer les params
         while (true){//tant qu'on est pas à la fin de la partie
             $this->render('round_game.html.twig',[]);//passer les params
@@ -63,6 +75,9 @@ class Controller extends AbstractController
     #[Route('/join_game', name: 'join_game')]
     public function joinGame(): Response
     {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
         //on check le code passe en param
         //si bon
         return $this->render('join_game.html.twig',[]);
@@ -78,6 +93,9 @@ class Controller extends AbstractController
     #[Route('/neo4j-test', name: 'test-neo4j')]
     public function index(): Response
     {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
         $client = ClientBuilder::create()
             ->withDriver('default', 'bolt://neo4j:password@neo4j:7687')
             ->build();

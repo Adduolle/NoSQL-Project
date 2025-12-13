@@ -2,25 +2,29 @@
 
 namespace App\Service;
 
-class RequeteRedis
+class RequetesRedis
 {
     private RedisService $redis;
 
-    public function __construct(RedisService $redis)
+    public function __construct()
     {
-        $this->redis = $redis;
+        $this->redis = new RedisService();
     }
 
     #gestion de party/waiting room
-    public function createParty(string $idUser): void
+    public function createParty(string $typeParty, string $idUser): string
     {
-        $key = "party:$idUser";
+        do {
+            $randomCode = str_pad((string)random_int(0, 99999), 5, '0', STR_PAD_LEFT);
+            $key = "$typeParty:$randomCode";
+        } while ($this->redis->get($key) !== null); 
+
         $this->redis->delete($key);
-        $items = []; 
-        foreach ($items as $item) {
-            $this->redis->lPush($key, $item);
-        }
+        $this->redis->lPush($key, $idUser);
+
+        return $randomCode;
     }
+
 
     public function AddPartyUser(string $IdParty, string $idUser): void
     {
