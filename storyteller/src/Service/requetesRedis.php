@@ -2,90 +2,110 @@
 
 namespace App\Service;
 
-class RequeteRedis
+class RequetesRedis
 {
     private RedisService $redis;
 
-    public function __construct(RedisService $redis)
+    public function __construct()
     {
-        $this->redis = $redis;
+        $this->redis = new RedisService();
     }
 
-    #gestion de party/waiting room
-    public function createParty(string $idUser): void
+    // Création d'une party avec type et premier joueur
+    public function createParty(string $typeParty, string $idUser): string
     {
-        $key = "party:$idUser";
-        $this->redis->delete($key);
-        $items = []; 
-        foreach ($items as $item) {
-            $this->redis->lPush($key, $item);
+        do {
+            $randomCode = str_pad((string)random_int(0, 99999), 5, '0', STR_PAD_LEFT);
+            $key = "party:$randomCode";
+        } while ($this->redis->get($key) !== false);
+
+        $this->redis->hSet($key, 'type', $typeParty);
+        $this->redis->lPush("$key:players", $idUser);
+
+        return $randomCode;
+    }
+
+    public function addPartyUser(string $idParty, string $User): void
+    {
+        $key = "party:$idParty:players";
+
+        // Récupérer les joueurs existants
+        $players = $this->GetPartyUsers($idParty);
+
+        // Vérifier si le joueur est déjà présent
+        foreach ($players as $p) {
+            $existing = json_decode($p, true);
+            if ($existing['id'] === json_decode($User, true)['id']) {
+                return; // déjà présent, on n'ajoute pas
+            }
         }
+
+        // Ajouter à la fin pour que l'host reste le premier
+        $this->redis->rPush($key, $User);
     }
 
-    public function AddPartyUser(string $IdParty, string $idUser): void
+
+    // Récupérer tous les joueurs d'une party
+    public function getPartyUsers(string $idParty): array
     {
-        $key = "party:$IdParty";
-        $this->redis->lPush($key, $idUser);
+        return $this->redis->lRange("party:$idParty:players", 0, -1) ?: [];
     }
 
-    public function GetPartyUsers(string $IdParty): array
+    // Récupérer les infos de la party (type etc.)
+    public function getPartyInfo(string $idParty): array
     {
-        $key = "party:$IdParty"; // Fixed variable name from $id to $IdParty
-
-        // Redis range start=0, end=-1 = toute la liste
-        return $this->redis->lRange($key, 0, -1) ?: [];
+        return $this->redis->hGetAll("party:$idParty");
     }
 
-    public function deleteParty(string $id): void
+    public function getPartyType(string $idParty): ?string
     {
-        $key = "party:$id";
-        $this->redis->delete($key);
+        return $this->redis->hGet("party:$idParty", 'type');
     }
 
-    #gestion des manches
-    public function CreateRounds(string $idUser, array $IdRounds): void
+    public function deleteParty(string $idParty): void
+    {
+        $this->redis->delete("party:$idParty");
+        $this->redis->delete("party:$idParty:players");
+    }
+
+    // Gestion des rounds
+    public function createRounds(string $idUser, array $idRounds): void
     {
         $key = "rounds:$idUser";
         $this->redis->delete($key);
-        foreach ($IdRounds as $round) {
+        foreach ($idRounds as $round) {
             $this->redis->lPush($key, $round);
         }
     }
 
-    public function GetRound(string $idUser, int $round): ?string
+    public function getRound(string $idUser, int $round): ?string
     {
-        $key = "rounds:$idUser";
-        return $this->redis->lIndex($key, $round) ?: null;
+        return $this->redis->lIndex("rounds:$idUser", $round) ?: null;
     }
 
-    public function GetRounds(string $idUser): array
+    public function getRounds(string $idUser): array
     {
-        $key = "rounds:$idUser";
-        return $this->redis->lRange($key, 0, -1) ?: [];
+        return $this->redis->lRange("rounds:$idUser", 0, -1) ?: [];
     }
 
-    public function DeleteRounds(string $idUser): void
+    public function deleteRounds(string $idUser): void
     {
-        $key = "rounds:$idUser";
-        $this->redis->delete($key);
+        $this->redis->delete("rounds:$idUser");
     }
 
-    #gestion des textes des manches précédentes
-    public function CreateScriptText(string $idScript, string $texte): void
+    // Gestion des textes des scripts
+    public function createScriptText(string $idScript, string $texte): void
     {
-        $key = "script:$idScript";
-        $this->redis->set($key, $texte);
+        $this->redis->set("script:$idScript", $texte);
     }
 
-    public function GetScriptText(string $idScript): ?string
+    public function getScriptText(string $idScript): ?string
     {
-        $key = "script:$idScript";
-        return $this->redis->get($key) ?: null;
+        return $this->redis->get("script:$idScript") ?: null;
     }
 
-    public function DeleteScriptText(string $idScript): void
+    public function deleteScriptText(string $idScript): void
     {
-        $key = "script:$idScript";
-        $this->redis->delete($key);
+        $this->redis->delete("script:$idScript");
     }
 }

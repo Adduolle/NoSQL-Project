@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
-
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Service\GameManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,42 +14,96 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class Controller extends AbstractController
 {
 
-    private GameManager $gameManager; //eux ils sont jamais générés nan ?
+    private GameManager $gameManager;
     private PlayerManager $playerManager;
-
-    #[Route('/waitroom/normal_game', name: 'create_waitroom_normal')]
-    public function createNormalRoom(): Response
+    
+    public function __construct(GameManager $gameManager)
     {
-        $room=$this->gameManager->setRoomType("normal");
-        return $this->render('waitroom.html.twig',[]); //passer params
+        $this->gameManager = $gameManager;
     }
 
-    #[Route('/waitroom/path_game', name: 'create_waitroom_path')]
-    public function createPathRoom(): Response
+    #[Route('/waitroom/normal_game', name: 'create_waitroom_normal')]
+    public function createNormalRoom(SessionInterface $session): Response
     {
-        $room=$this->gameManager->setRoomType("path");
-        return $this->render('waitroom.html.twig',[]); //passer params
+        if (!isset($this->gameManager)) {
+            $this->gameManager = new GameManager();
+        }
+
+        $room = $this->gameManager->setRoomType("normal", $session);
+
+        return $this->render('waitroom.html.twig', [
+            'roomID' => $room['roomId'],
+            'roomType' => $room['roomType'],
+            'userID' => $room['userID'],
+            'pseudo' => $room['pseudo']
+        ]);
+    }
+
+
+    #[Route('/waitroom/path_game', name: 'create_waitroom_path')]
+    public function createPathRoom(SessionInterface $session): Response
+    {
+        if (!isset($this->gameManager)) {
+            $this->gameManager = new GameManager();
+        }
+
+        $room = $this->gameManager->setRoomType("path", $session);
+
+        return $this->render('waitroom.html.twig', [
+            'roomID' => $room['roomId'],
+            'roomType' => $room['roomType'],
+            'userID' => $room['userID'],
+            'pseudo' => $room['pseudo']
+        ]);
+    }
+
+    #[Route('/waitroom/{id}/join', name: 'JoinRoom')]
+    public function JoinRoom(string $id, SessionInterface $session): Response
+    {
+        if (!isset($this->gameManager)) {
+            $this->gameManager = new GameManager();
+        }
+
+        $room = $this->gameManager->joinRoom($id, $session);
+
+        return $this->render('waitroom.html.twig', [
+            'roomID' => $room['roomId'],
+            'roomType' => $room['roomType'],
+            'userID' => $room['userID'],
+            'pseudo' => $room['pseudo']
+        ]);
     }
 
     #[Route('/waitroom/{id}/players', name: 'room_players')]
-    public function roomPlayers(): JsonResponse
+    public function roomPlayers(string $id): JsonResponse
     {
-        $players = [];
-
-        foreach ($this->gameManager->getPlayers() as $player) {
-            $players[] = $player->getUsername();
+        if ($this->gameManager === null) {
+            $this->gameManager = new GameManager();
         }
-        $host=$players[0] ?? null;
 
-        return new JsonResponse([
-            'players' => $players,
-            'host' => $host
-        ]);
+        try {
+            $players = $this->gameManager->getPlayersInGame($id);
+            $host = $players[0] ?? null;
+            error_log(print_r($players, true));
+            return new JsonResponse([
+                'players' => $players,
+                'host' => $host
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
+
 
     #[Route('/game_loop', name: 'game_loop')]
     public function gameLoop(): Response
     {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
         $this->render('first_game.html.twig',[]); //passer les params
         while (true){//tant qu'on est pas à la fin de la partie
             $this->render('round_game.html.twig',[]);//passer les params
@@ -59,15 +114,6 @@ class Controller extends AbstractController
         return $this->render('end_game.html.twig',[]); //passer les params
     }
 
-    //join game button, sends a password code
-    #[Route('/join_game', name: 'join_game')]
-    public function joinGame(): Response
-    {
-        //on check le code passe en param
-        //si bon
-        return $this->render('join_game.html.twig',[]);
-        //si faux
-    }
     //TODO ask code
     //TODO if good code :
         //TODO associate player cookie to game cookie
@@ -78,6 +124,9 @@ class Controller extends AbstractController
     #[Route('/neo4j-test', name: 'test-neo4j')]
     public function index(): Response
     {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
         $client = ClientBuilder::create()
             ->withDriver('default', 'bolt://neo4j:password@neo4j:7687')
             ->build();
@@ -85,5 +134,16 @@ class Controller extends AbstractController
         $value = $result->first()->get('test');
 
         return new Response("Connexion OK : $value");
+    }
+
+    #[Route('/start_game', name: 'start_game')]
+    public function startGame(): Response
+    {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
+        //TODO only host can start
+        //TODO set game started in redis
+        return null; //passer les params
     }
 }

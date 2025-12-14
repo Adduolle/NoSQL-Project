@@ -6,13 +6,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class Requests
+class RequetesNeo4j
 {
     private Neo4JService $neo4j;
 
-    public function __construct(Neo4JService $neo4j)
+    public function __construct()
     {
-        $this->neo4j = $neo4j;
+        $this->neo4j = new Neo4JService();
     }
 
     public function createUser(Request $request): Response
