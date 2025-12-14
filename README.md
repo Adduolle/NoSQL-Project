@@ -9,7 +9,7 @@
 
 ```
 git clone https://github.com/Adduolle/NoSQL-Project.git
-cd nosql-project
+cd NoSQL-Project
 chmod +x install.sh
 bash install.sh
 ```
