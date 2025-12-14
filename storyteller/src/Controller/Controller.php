@@ -14,9 +14,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class Controller extends AbstractController
 {
 
-    private GameManager $gameManager; //eux ils sont jamais générés nan ?
+    private GameManager $gameManager;
     private PlayerManager $playerManager;
-
+    
+    public function __construct(GameManager $gameManager)
+    {
+        $this->gameManager = $gameManager;
+    }
+    
     #[Route('/waitroom/normal_game', name: 'create_waitroom_normal')]
     public function createNormalRoom(Request $request, SessionInterface $session): Response
     {
@@ -53,23 +58,29 @@ class Controller extends AbstractController
     }
 
     #[Route('/waitroom/{id}/players', name: 'room_players')]
-    public function roomPlayers(): JsonResponse
+    public function roomPlayers(string $id): JsonResponse
     {
-        if( $gameManager === null){
-            $gameManager = new GameManager();
-        }   
-        $players = [];
-
-        foreach ($this->gameManager->getPlayers() as $player) {
-            $players[] = $player->getUsername();
+        if ($this->gameManager === null) {
+            $this->gameManager = new GameManager();
         }
-        $host=$players[0] ?? null;
 
-        return new JsonResponse([
-            'players' => $players,
-            'host' => $host
-        ]);
+        try {
+            $players = $this->gameManager->getPlayersInGame($id);
+            $host = $players[0] ?? null;
+            error_log(print_r($players, true));
+            return new JsonResponse([
+                'players' => $players,
+                'host' => $host
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => $e->getMessage()
+            ], 500);
+        }
+        
     }
+
+
 
     #[Route('/game_loop', name: 'game_loop')]
     public function gameLoop(): Response

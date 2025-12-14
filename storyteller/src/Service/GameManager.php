@@ -67,4 +67,21 @@ class GameManager
         ];
     }
 
+    public function getPlayersInGame(string $roomId): array
+    {
+        $usersData = $this->requetesRedis->GetPartyUsers($roomId);
+        $players = [];
+
+        foreach ($usersData as $userData) {
+            $user = json_decode($userData, true);
+            if ($user) {
+                $players[] = [
+                    'id' => $user['id'],
+                    'username' => $user['username']
+                ];
+            }
+        }
+
+        return $players;
+    }
 }

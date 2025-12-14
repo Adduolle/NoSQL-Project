@@ -23,7 +23,7 @@
 
             <div class="card tale-room-card p-3 shadow-lg">
                 <div class="card-body">
-                    <h3 class="card-title mb-4 tale-room-title">Salle d'attente - {{ roomType|capitalize }}</h3>
+                    <h3 class="card-title mb-4 tale-room-title">Salle d'attente</h3>
 
                     <h4>Joueurs présents :</h4>
                     <div class="scrollable-content-stories">
@@ -52,13 +52,14 @@
 <script>
     const roomID = "{{ roomID }}";
     const userID = "{{ userID }}";
-    const url = `/room/${roomID}/players`;
+    const url = `/waitroom/${roomID}/players`;
 
     async function refreshPlayers() {
         try {
             const response = await fetch(url);
+            console.log("Réponse reçue :", response);
             const data = await response.json();
-
+            console.log("Données reçues :", data);
             const list = document.getElementById('players-list');
             list.innerHTML = '';
 
@@ -86,7 +87,7 @@
         }
     }
 
-    setInterval(refreshPlayers, 2000);
+    setInterval(refreshPlayers, 10000);
     refreshPlayers();
 
     document.getElementById('copy-room-id').addEventListener('click', () => {
