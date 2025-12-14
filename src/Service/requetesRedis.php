@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-class RequeteRedis
+class requetesRedis
 {
     private RedisService $redis;
 

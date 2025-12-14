@@ -2,6 +2,12 @@
 
 {% block title %}Taleroom - Accueil{% endblock %}
 {% block body %}
+    {% for message in app.flashes('info') %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
         <!--barre de navegation-->
         <header class="main-header">
             <nav class="navbar navbar-expand-sm navbar-light p-4">
@@ -11,7 +17,7 @@
                     <li class="nav-items user-profile">
 
                         <a class="nav-link" href="/profile">
-                            <span class="user-name">{{ user.nickname }}</span> 
+                            <span class="user-name">{{ player.nickname }}</span> 
                         </a>
                         
                     </li>
@@ -23,26 +29,33 @@
 
             <div class="container">
                 <div class="row justify-content-center h-100">
-                    <div class="col-md-10 col-lg-10">
-                        <div class="card tale-room-card">
-                            <div class="card-body">
+                    {% if game.round > 0 %}
+                        <div class="col-md-10 col-lg-10">
+                            <div class="card tale-room-card">
+                                <div class="card-body">
 
-                                <div class="scrollable-content-stories">
-                                    <div id="stories-created">
-                                        <div class="story-item ">
-                                            <p class="story-text">{{ user.text }}</p>
+                                    <div class="scrollable-content-stories">
+                                        <div id="stories-created">
+                                            <div class="story-item ">
+                                                <p class="story-text">{{ assigned_text }}</p>
+                                            </div>
                                         </div>
                                     </div>
+
+                                
                                 </div>
 
-                               
                             </div>
-
+                            <h1 class="title-suite">Ecrivez la suite de l'histoire :</h1>
                         </div>
-                         <h1 class="title-suite">Ecrivez la suite de l'histoire:</h1>
-                    </div>
+                    {% else %}
+                        <div class="col-md-10 col-lg-10">
+                            <h1 class="title-suite">Ecrivez le début d'une histoire :</h1>
+                        </div>
+                    {% endif %}
 
-                    <form id="form-new-text">
+
+                    <form id="form-new-text" action="/game_loop" method="POST">
 
                         <div class="text-contribution">
                             <div class="form-group">

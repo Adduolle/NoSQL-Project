@@ -2,21 +2,48 @@
 
 namespace App\Service;
 
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\CacheItemInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Cookie;
+use App\Service\requetesNeo4j;
 
 class PlayerManager
 {
-    private CacheItemPoolInterface $cache;
-    private string $cookieName;
-    private int $ttlSeconds;
-
-    public function __construct(CacheItemPoolInterface $cache, string $cookieName = 'player_token', int $ttlSeconds = 604800)
+    public function checkOrCreatePlayers(Request $request, requetesNeo4j $nj4): void
     {
-        $this->cache = $cache;
-        $this->cookieName = $cookieName;
-        $this->ttlSeconds = $ttlSeconds;
+        // On gère le joueur actuel
+        if (!$request->cookies->get('player_0')){
+            $this->createTestPlayer('0');
+        };
+        // On gère les 3 joueurs test
+        if (!$request->cookies->get('player_1')){
+            for ($i = 1; $i <= 3; $i++) {
+                $this->createTestPlayer((string)$i);
+            }
+        }
+    }
+    public function createTestPlayer(string $playerId):Cookie{
+        $cookie = Cookie::create("player_".$playerId)
+            ->withValue(json_encode([
+                'in_game'=>true,
+                'game_id'=>'game_0',
+                'round'=>0,
+                'nickname'=>'Joueur '.$playerId,
+            ]))
+            ->withExpires(new \DateTime('+1 day')) // cookie valide 1 jour
+            ->withPath('/')
+            ->withHttpOnly(false);
+        return $cookie;
+    }
+
+    public function getNickname(Request $request, string $userId): ?string
+    {
+        $playerCookie = $request->cookies->get('player_'.$userId);
+        if ($playerCookie){
+            return $playerCookie['nickname'];
+        } else {
+            return "No Nickname Found";
+        }
+        ;
     }
 
     public function getCookieName(): string
@@ -35,7 +62,7 @@ class PlayerManager
      */
     public function loadOrCreate(Request $request, ?string $userId = null): array
     {
-        $token = $request->cookies->get($this->cookieName);
+        $token = $request->cookies->get($userId);
         $now = new \DateTimeImmutable();
 
         if ($token) {
@@ -102,14 +129,5 @@ class PlayerManager
 
         return [$token, $cacheKey, $item, $data];
     }
-
-    public function setUsername(CacheItemInterface $item, string $username): void
-    {
-        $data = $item->get();
-        $data['username'] = $username;
-        $data['last_seen'] = (new \DateTimeImmutable())->format(DATE_ATOM);
-        $item->set($data);
-        $item->expiresAfter($this->ttlSeconds);
-        $this->cache->save($item);
-    }
+    
 }
