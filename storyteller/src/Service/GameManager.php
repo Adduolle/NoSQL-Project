@@ -66,6 +66,35 @@ class GameManager
             'pseudo' => $pseudo
         ];
     }
+    public function joinRoom(string $roomId, SessionInterface $session): array
+    {
+        // Créer un userId unique pour le joueur
+        if (!$session->has('userID')) {
+            $userId = bin2hex(random_bytes(8));
+            $pseudo = 'Player' . random_int(1000, 9999);
+
+            $session->set('userID', $userId);
+            $session->set('pseudo', $pseudo);
+        } else {
+            $userId = $session->get('userID');
+            $pseudo = $session->get('pseudo');
+        }
+
+        // Ajouter le joueur à la salle existante
+        $this->requetesRedis->addPartyUser($roomId, json_encode([
+            'id' => $userId,
+            'username' => $pseudo
+        ]));
+
+        $roomType = $this->requetesRedis->GetPartyType($roomId);
+
+        return [
+            'roomType' => $roomType,
+            'roomId' => $roomId,
+            'userID' => $userId,
+            'pseudo' => $pseudo
+        ];
+    }
 
     public function getPlayersInGame(string $roomId): array
     {

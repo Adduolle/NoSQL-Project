@@ -2,47 +2,57 @@
 
 {% block title %}Taleroom - Accueil{% endblock %}
 {% block body %}
-        <main class="container-fluid  align-items-center">
-           
-            
-            <div class="row justify-content-center align-items-center vh-100">
-                 <!--creer une nouvelle histoire-->
-                <div class="col-12 col-sm-10 col-md-10 col-lg-6 col-xl-6 text-center justify-content-center">
+    <main class="container-fluid  align-items-center">
+        
+        
+        <div class="row justify-content-center align-items-center vh-100">
+                <!--creer une nouvelle histoire-->
+            <div class="col-12 col-sm-10 col-md-10 col-lg-6 col-xl-6 text-center justify-content-center">
 
-                     <div class="logo">
-                        <img src="{{ asset('images/TaleRoom-home.png')}}"   alt="image logotype de TaleRoom">
-                     </div>
+                    <div class="logo">
+                    <img src="{{ asset('images/TaleRoom-home.png')}}"   alt="image logotype de TaleRoom">
+                    </div>
 
-                    <div class="card tale-room-card-home p-2 shadow-lg">
-                        <div class="card-body">
-                            <h3 class="card-title mb-4 tale-room-title">Créer une nouvelle histoire</h3>
+                <div class="card tale-room-card-home p-2 shadow-lg">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4 tale-room-title">Créer une nouvelle histoire</h3>
 
-                            <div class="d-flex justify-content-around mb-5">
-                                <button class="btn cta-box-button primary-cta-box" onclick="location.href='/waitroom/normal_game'">
-                                    Histoire Classique
-                                </button>
-                                <button class="btn cta-box-button primary-cta-box" onclick="location.href='/waitroom/path_game'">
-                                    Histoire en branches
-                                </button>
-                            </div>
-                            
+                        <div class="d-flex justify-content-around mb-5">
+                            <button class="btn cta-box-button primary-cta-box" onclick="location.href='/waitroom/normal_game'">
+                                Histoire Classique
+                            </button>
+                            <button class="btn cta-box-button primary-cta-box" onclick="location.href='/waitroom/path_game'">
+                                Histoire en branches
+                            </button>
                         </div>
                         
                     </div>
-                    <div class="join-section">
-                        <h3 class="mb-2 join-text">Rejoindre une partie :</h3>
-
-                            <form action="/join-game" method="post" class="d-flex flex-column align-items-center">
-                                <input type="text" class="form-control-lg input-code mb-3" placeholder="Entrer le code d'invitation" name="gameCode" required>
-                           
-                                <button type="submit" class="btn tale-room-btn">
-                                    Enter
-                                </button>
-                            </form>
-                    </div>
+                    
                 </div>
-
+                <div class="join-section">
+                    <h3 class="mb-2 join-text">Rejoindre une partie :</h3>
+                    <form id="join-room-form" class="d-flex flex-column align-items-center">
+                        <input type="text" class="form-control-lg input-code mb-3" 
+                            placeholder="Entrer le code d'invitation" 
+                            name="gameCode" 
+                            id="gameCode" 
+                            required>
+                        <button type="submit" class="btn tale-room-btn">Enter</button>
+                    </form>
+                </div>
             </div>
 
-        </main>
+        </div>
+
+    </main>
+    <script>
+        const form = document.getElementById('join-room-form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); 
+            const code = document.getElementById('gameCode').value.trim();
+            if (code) {
+                window.location.href = `/waitroom/${code}/join`;
+            }
+        });
+    </script>
 {% endblock %}

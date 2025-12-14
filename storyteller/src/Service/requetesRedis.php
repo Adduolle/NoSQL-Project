@@ -25,11 +25,25 @@ class RequetesRedis
         return $randomCode;
     }
 
-    // Ajouter un joueur à une party
-    public function addPartyUser(string $idParty, string $idUser): void
+    public function addPartyUser(string $idParty, string $User): void
     {
-        $this->redis->lPush("party:$idParty:players", $idUser);
+        $key = "party:$idParty:players";
+
+        // Récupérer les joueurs existants
+        $players = $this->GetPartyUsers($idParty);
+
+        // Vérifier si le joueur est déjà présent
+        foreach ($players as $p) {
+            $existing = json_decode($p, true);
+            if ($existing['id'] === json_decode($User, true)['id']) {
+                return; // déjà présent, on n'ajoute pas
+            }
+        }
+
+        // Ajouter à la fin pour que l'host reste le premier
+        $this->redis->rPush($key, $User);
     }
+
 
     // Récupérer tous les joueurs d'une party
     public function getPartyUsers(string $idParty): array
@@ -41,6 +55,11 @@ class RequetesRedis
     public function getPartyInfo(string $idParty): array
     {
         return $this->redis->hGetAll("party:$idParty");
+    }
+
+    public function getPartyType(string $idParty): ?string
+    {
+        return $this->redis->hGet("party:$idParty", 'type');
     }
 
     public function deleteParty(string $idParty): void

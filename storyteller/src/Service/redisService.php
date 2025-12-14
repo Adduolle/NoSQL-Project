@@ -39,6 +39,13 @@ class RedisService
         return $result;
     }
 
+    public function rPush(string $key, string $value): int
+    {
+        $result = $this->redis->rPush($key, $value);
+        $this->redis->expire($key, $this->ttl); 
+        return $result;
+    }
+
     public function lRange(string $key, int $start, int $stop): array
     {
         return $this->redis->lRange($key, $start, $stop) ?: [];

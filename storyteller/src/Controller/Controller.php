@@ -21,9 +21,9 @@ class Controller extends AbstractController
     {
         $this->gameManager = $gameManager;
     }
-    
+
     #[Route('/waitroom/normal_game', name: 'create_waitroom_normal')]
-    public function createNormalRoom(Request $request, SessionInterface $session): Response
+    public function createNormalRoom(SessionInterface $session): Response
     {
         if (!isset($this->gameManager)) {
             $this->gameManager = new GameManager();
@@ -41,13 +41,30 @@ class Controller extends AbstractController
 
 
     #[Route('/waitroom/path_game', name: 'create_waitroom_path')]
-    public function createPathRoom(Request $request, SessionInterface $session): Response
+    public function createPathRoom(SessionInterface $session): Response
     {
         if (!isset($this->gameManager)) {
             $this->gameManager = new GameManager();
         }
 
         $room = $this->gameManager->setRoomType("path", $session);
+
+        return $this->render('waitroom.html.twig', [
+            'roomID' => $room['roomId'],
+            'roomType' => $room['roomType'],
+            'userID' => $room['userID'],
+            'pseudo' => $room['pseudo']
+        ]);
+    }
+
+    #[Route('/waitroom/{id}/join', name: 'JoinRoom')]
+    public function JoinRoom(string $id, SessionInterface $session): Response
+    {
+        if (!isset($this->gameManager)) {
+            $this->gameManager = new GameManager();
+        }
+
+        $room = $this->gameManager->joinRoom($id, $session);
 
         return $this->render('waitroom.html.twig', [
             'roomID' => $room['roomId'],
@@ -77,7 +94,6 @@ class Controller extends AbstractController
                 'error' => $e->getMessage()
             ], 500);
         }
-        
     }
 
 
@@ -98,18 +114,6 @@ class Controller extends AbstractController
         return $this->render('end_game.html.twig',[]); //passer les params
     }
 
-    //join game button, sends a password code
-    #[Route('/join_game', name: 'join_game')]
-    public function joinGame(): Response
-    {
-        if( $gameManager === null){
-            $gameManager = new GameManager();
-        }   
-        //on check le code passe en param
-        //si bon
-        return $this->render('join_game.html.twig',[]);
-        //si faux
-    }
     //TODO ask code
     //TODO if good code :
         //TODO associate player cookie to game cookie
