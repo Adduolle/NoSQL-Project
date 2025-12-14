@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Taleroom - Waiting Room{% endblock %}
+
+{% block body %}
+<main class="container-fluid align-items-center">
+
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 text-center">
+
+            <div class="logo mb-4">
+                <img src="{{ asset('images/TaleRoom-home.png') }}" alt="Logo TaleRoom">
+            </div>
+
+            <div class="d-flex justify-content-center mb-4">
+                <div class="d-flex align-items-center">
+                    <div class="room-id-box px-4 py-3 rounded shadow-sm" style="background-color: #FECC51; border: 2px solid #C19934; text-align: center;">
+                        <span id="room-id-text" class="fw-bold" style="color: #158e27; font-size: 1.5rem;">{{ roomID }}</span>
+                    </div>
+                    <button class="btn btn-sm tale-room-btn ms-2" id="copy-room-id" style="margin: 0; padding: 0 12px; height: 100%; font-size: 1rem;">Copier</button>
+                </div>
+            </div>
+
+            <div class="card tale-room-card p-3 shadow-lg">
+                <div class="card-body">
+                    <h3 class="card-title mb-4 tale-room-title">Salle d'attente - {{ roomType|capitalize }}</h3>
+
+                    <h4>Joueurs présents :</h4>
+                    <div class="scrollable-content-stories">
+                        <ul id="players-list" class="list-unstyled mb-0">
+                            <li>Chargement…</li>
+                        </ul>
+                    </div>
+
+                    <div id="host-actions" class="mt-3" style="display:none;">
+                        <em>Vous êtes l'hôte de la partie</em>
+                        <form method="post" action="{{ path('start_game', {'roomId': roomID}) }}">
+                            <button type="submit" class="btn tale-room-btn mt-2">Start Game</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <p class="mt-4"><a href="{{ path('homepage') }}" class="btn tale-room-btn">Retour</a></p>
+
+        </div>
+    </div>
+
+</main>
+
+<script>
+    const roomID = "{{ roomID }}";
+    const userID = "{{ userID }}";
+    const url = `/room/${roomID}/players`;
+
+    async function refreshPlayers() {
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const list = document.getElementById('players-list');
+            list.innerHTML = '';
+
+            if (data.players.length === 0) {
+                list.innerHTML = '<li>Aucun joueur</li>';
+                document.getElementById('host-actions').style.display = 'none';
+                return;
+            }
+
+            data.players.forEach((p, index) => {
+                const li = document.createElement('li');
+                li.textContent = p.username;
+                if (index === 0) li.textContent += " (host)";
+                list.appendChild(li);
+            });
+
+            if (data.players[0].id === userID) {
+                document.getElementById('host-actions').style.display = 'block';
+            } else {
+                document.getElementById('host-actions').style.display = 'none';
+            }
+
+        } catch (err) {
+            console.error("Erreur lors du refresh des joueurs :", err);
+        }
+    }
+
+    setInterval(refreshPlayers, 2000);
+    refreshPlayers();
+
+    document.getElementById('copy-room-id').addEventListener('click', () => {
+        const roomIdText = document.getElementById('room-id-text').textContent;
+        navigator.clipboard.writeText(roomIdText).catch(err => console.error(err));
+    });
+
+</script>
+{% endblock %}

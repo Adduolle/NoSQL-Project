@@ -281,3 +281,24 @@ h3{
     font-size: medium;
     font-family: var(--police-corps);
 }
+
+.room-id-box {
+    background-color: var(--couleur-fond-navbar);
+    border-radius: 12px;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    font-size: 1.2rem;
+}
+
+.room-id-box span {
+    color: var(--couleur-vert-foncé);
+    font-family: var(--police-corps);
+}
+
+.room-id-box button {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+}

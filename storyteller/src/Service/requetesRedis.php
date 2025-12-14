@@ -17,11 +17,11 @@ class RequetesRedis
         do {
             $randomCode = str_pad((string)random_int(0, 99999), 5, '0', STR_PAD_LEFT);
             $key = "$typeParty:$randomCode";
-        } while ($this->redis->get($key) !== null); 
+            
+        } while ($this->redis->get($key) !== false); 
 
         $this->redis->delete($key);
         $this->redis->lPush($key, $idUser);
-
         return $randomCode;
     }
 

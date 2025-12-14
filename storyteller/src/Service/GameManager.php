@@ -5,6 +5,8 @@ namespace App\Service;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\CacheItemInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 
 class GameManager
 {
@@ -37,8 +39,32 @@ class GameManager
         //todo create the list of script in order 
     }
 
-    public function setRoomType(string $roomType): void
+    public function setRoomType(string $roomType, SessionInterface $session): array
     {
-         $this->requetesRedis->createParty($roomType, "test"); 
+        // Créer un userId unique pour l'hôte
+        if (!$session->has('userID')) {
+            $userId = bin2hex(random_bytes(8));
+            $pseudo = 'Host' . random_int(1000, 9999);
+
+            $session->set('userID', $userId);
+            $session->set('pseudo', $pseudo);
+        } else {
+            $userId = $session->get('userID');
+            $pseudo = $session->get('pseudo');
+        }
+
+        // Créer la salle et ajouter l'hôte comme premier utilisateur
+        $roomId = $this->requetesRedis->createParty($roomType, json_encode([
+            'id' => $userId,
+            'username' => $pseudo
+        ]));
+
+        return [
+            'roomType' => $roomType,
+            'roomId' => $roomId,
+            'userID' => $userId,
+            'pseudo' => $pseudo
+        ];
     }
+
 }

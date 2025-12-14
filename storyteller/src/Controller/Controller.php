@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
-
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Service\GameManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,23 +18,38 @@ class Controller extends AbstractController
     private PlayerManager $playerManager;
 
     #[Route('/waitroom/normal_game', name: 'create_waitroom_normal')]
-    public function createNormalRoom(): Response
+    public function createNormalRoom(Request $request, SessionInterface $session): Response
     {
         if (!isset($this->gameManager)) {
             $this->gameManager = new GameManager();
-        }           
-        $room = $this->gameManager->setRoomType("normal");
-        return $this->render('waitroom.html.twig',[]); //passer params
+        }
+
+        $room = $this->gameManager->setRoomType("normal", $session);
+
+        return $this->render('waitroom.html.twig', [
+            'roomID' => $room['roomId'],
+            'roomType' => $room['roomType'],
+            'userID' => $room['userID'],
+            'pseudo' => $room['pseudo']
+        ]);
     }
 
+
     #[Route('/waitroom/path_game', name: 'create_waitroom_path')]
-    public function createPathRoom(): Response
+    public function createPathRoom(Request $request, SessionInterface $session): Response
     {
         if (!isset($this->gameManager)) {
             $this->gameManager = new GameManager();
-        }   
-        $room = $this->gameManager->setRoomType("path");
-        return $this->render('waitroom.html.twig',[]); //passer params
+        }
+
+        $room = $this->gameManager->setRoomType("path", $session);
+
+        return $this->render('waitroom.html.twig', [
+            'roomID' => $room['roomId'],
+            'roomType' => $room['roomType'],
+            'userID' => $room['userID'],
+            'pseudo' => $room['pseudo']
+        ]);
     }
 
     #[Route('/waitroom/{id}/players', name: 'room_players')]
@@ -103,5 +119,16 @@ class Controller extends AbstractController
         $value = $result->first()->get('test');
 
         return new Response("Connexion OK : $value");
+    }
+
+    #[Route('/start_game', name: 'start_game')]
+    public function startGame(): Response
+    {
+        if( $gameManager === null){
+            $gameManager = new GameManager();
+        }   
+        //TODO only host can start
+        //TODO set game started in redis
+        return null; //passer les params
     }
 }

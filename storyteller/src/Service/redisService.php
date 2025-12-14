@@ -30,9 +30,9 @@ class RedisService
         $this->redis->del($key);
     }
 
-    // Tu peux rajouter autant de méthodes que tu veux :
-    public function increment(string $key): int
+    // Ajoute un élément en tête d'une liste
+    public function lPush(string $key, string $value): int
     {
-        return $this->redis->incr($key);
+        return $this->redis->lPush($key, $value);
     }
 }
