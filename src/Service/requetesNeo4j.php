@@ -2,17 +2,16 @@
 
 namespace App\Service;
 
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\Neo4JService;
 
-class requetesNeo4j
+class RequetesNeo4j
 {
     private Neo4JService $neo4j;
-
-    public function __construct(Neo4JService $neo4j)
+    public function __construct()
     {
-        $this->neo4j = $neo4j;
+        $this->neo4j = new Neo4JService();
     }
 
     public function createUser(string $userId, string $name): Response
@@ -37,9 +36,9 @@ class requetesNeo4j
         return new Response("User $name created");
     }
 
-    public function createGame(string $gameId, array $userIds): Response
+    public function createGame(string $gameId, string $roomType, array $players): Response
     {
-        if (!$gameId || !$userIds) {
+        if (!$gameId || !$players) {
             return new Response("Missing gameId or userIds[]", 400);
         }
 
@@ -52,6 +51,11 @@ class requetesNeo4j
             CREATE (u)-[:PARTICIPATE_TO]->(g)
             RETURN g, collect(u) AS participants
         ';
+        $userIds=[];
+        foreach ($players as $player){
+            $player = json_decode($player, true);
+            $userIds[]=$player['id'];
+        }
 
         $params = [
             'gameId' => $gameId,
@@ -70,6 +74,7 @@ class requetesNeo4j
         }
         
         foreach ($players as $player) {
+            $player = json_decode($player, true);
             $playerId = $player['id'];
             $storyId = $gameId . '_story_' . $playerId;
 
@@ -103,7 +108,7 @@ class requetesNeo4j
             MATCH (s:Story {id: $storyId})
             CREATE (sc:Script {
                 id: $scriptId,
-                createdAt: datetime(),
+                createdAt: datetime()
             })
             CREATE (sc)-[:FIRST_OF]->(s)
             CREATE (u:User {id: $playerId})-[:ASSIGNED {content: "", createdAt: datetime()}]->(sc)
@@ -128,7 +133,7 @@ class requetesNeo4j
             MATCH (prev:Script {id: $prevScriptId})
             CREATE (sc:Script {
                 id: $scriptId,
-                createdAt: datetime(),
+                createdAt: datetime()
             })
             CREATE (prev)-[:NEXT]->(sc)
             CREATE (u:User {id: $playerId})-[:ASSIGNED {content: "", createdAt: datetime()}]->(sc)
@@ -139,9 +144,11 @@ class requetesNeo4j
         $prevScriptId = $firstScriptId;
         for ($i=1; $i < $count; $i++) {
             if ($posPlayer + $i < $count) {
-                $nextId = $players[$posPlayer + $i]['id'];
+                $player = json_decode($players[$posPlayer + $i], true);
+                $nextId = $player['id'];
             } else {
-                $nextId = $players[($posPlayer + $i) % $count]['id'];
+                $player = json_decode($players[($posPlayer + $i) % $count], true);
+                $nextId = $player['id'];
             }
             $params = [
                 'prevScriptId' => $prevScriptId,
@@ -166,7 +173,7 @@ class requetesNeo4j
             MATCH (sc:Script {id: $scriptId})
             MATCH (u:User {id: $userId})
             CREATE (u)-[a:ASSIGNED {content: $text,createdAt: datetime()}]->(sc)
-            RETURN w
+            RETURN a
         ';
 
         $params = [
@@ -202,6 +209,28 @@ class requetesNeo4j
         $record = $result->getRecord();
 
         return $record ? $record->get('content') : null;
+    }
+
+    public function getStories(string $gameId):array{
+        $query = '
+                MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(s:Story)
+                MATCH (s)<-[:FIRST_OF]-(first:Script)
+                MATCH path = (first)-[:NEXT*0..]->(sc:Script)
+                MATCH (sc)-[a:ASSIGNED]->(u:User)
+
+                WITH s, sc, u, a, length(path) AS position
+                ORDER BY s, position
+
+                WITH s,
+                    collect({name:u.name, text:a.content}) AS playersTexts
+
+                RETURN collect({
+                    title: s.title,
+                    players: playersTexts
+                }) AS stories';
+        $params = ['gameId' => $gameId];
+        $result = $this->neo4j->run($query, $params);
+        return $result;
     }
 
 }

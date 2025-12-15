@@ -30,21 +30,6 @@ class HomeController extends AbstractController
         $error = null;
         $success = null;
 
-        if ($request->isMethod('POST')) {
-            $desired = trim($request->request->get('username', ''));
-            if ($desired === '') {
-                $error = 'Username cannot be empty.';
-            } else {
-                if (preg_match('/^[A-Za-z0-9_-]+$/', $desired)) {
-                    $playerManager->setUsername($item, $desired);
-                    $currentUsername = $desired;
-                    $success = 'Username linked successfully.';
-                } else {
-                    $error = 'Invalid username — only letters, numbers, hyphens and underscores are allowed.';
-                }
-            }
-        }
-
         $response = $this->render('index.html.twig', [
             'user_id' => $token,
             'username' => $currentUsername,

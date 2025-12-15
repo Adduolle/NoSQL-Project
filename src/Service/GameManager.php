@@ -2,96 +2,115 @@
 
 namespace App\Service;
 
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\CacheItemInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class GameManager
 {
-    public function createGame(string $gameId, array $playerIds): void
+    private RequetesRedis $requetesRedis;
+    private int $nbPlayers=0;
+
+    public function __construct()
     {
-        //todo create party with list of player in redis
-
-        //todo use neo4j
-        //createGameWithParticipants($gameId, $playerIds);
-        //for k in range(len(playerIds)):
-            //createIdHistoire
-          //  createStory($gameId , $storyId)
-            //for j in range(len(playerIds)):
-              //  createScript($storyId,$scriptId, j)
-
-        //todo create the list of script in order 
+        $this->requetesRedis = new RequetesRedis();
     }
 
-    public function createTestGame(): Cookie
+    public function setRoomType(string $roomType, SessionInterface $session): array
     {
-        // Création du cookie de la game test
-        $cookie = Cookie::create('game_0')
-            ->withValue(json_encode([
-                'code' => '2945',
-                'name' => 'Partie Test',
-                'round'=>0,
-            ]))
-            ->withExpires(new \DateTime('+1 day')) // cookie valide 1 jour
-            ->withPath('/')
-            ->withHttpOnly(false);
-        return $cookie;
-    }
+        // Créer un userId unique pour l'hôte
+        if (!$session->has('userID')) {
+            $userId = bin2hex(random_bytes(8));
+            $pseudo = 'Host' . random_int(1000, 9999);
 
-    public function getGameById(string $gameId, Request $request): ?array
-    {
-        // On récupère la game existante
-        $gameValue = $request->cookies->get($gameId);
-        // On décode ses infos
-        $game=[
-            'code' => json_decode($gameValue, true)['code'],
-            'name' => json_decode($gameValue, true)['name'],
-            'round'=>json_decode($gameValue, true)['round'],
-        ];
-        return $game;
-    }
-
-    public function checkOrCreateGameTest(Request $request): Cookie
-    {
-        $cookieName = 'game_0';
-        $cookieValue = $request->cookies->get($cookieName);
-
-        if (!$cookieValue) {
-            // Si le cookie n'existe pas, créer un nouveau Cookie
-            return $this->createTestGame();
+            $session->set('userID', $userId);
+            $session->set('pseudo', $pseudo);
+        } else {
+            $userId = $session->get('userID');
+            $pseudo = $session->get('pseudo');
         }
 
-        // Si le cookie existe, recréer un objet Cookie à partir de la valeur
-        return Cookie::create($cookieName)
-            ->withValue($cookieValue)
-            ->withPath('/')
-            ->withHttpOnly(false)
-            ->withExpires(new \DateTime('+1 day'));
-    }
+        // Créer la salle et ajouter l'hôte comme premier utilisateur
+        $roomId = $this->requetesRedis->createParty($roomType, json_encode([
+            'id' => $userId,
+            'username' => $pseudo
+        ]));
+        $session->set('roomID', $roomId);
+        $session->set('round',0);
+        $session->set('roomType', $roomType);
 
-    public function modifyGameRound(string $gameId, int $newRound, Request $request): Cookie
+        return [
+            'roomType' => $roomType,
+            'roomId' => $roomId,
+            'userID' => $userId,
+            'pseudo' => $pseudo
+        ];
+    }
+    public function joinRoom(string $roomId, SessionInterface $session): array
     {
-        // On modifie le round de la game
-        $gameValue = $request->cookies->get($gameId);
-        $gameData = json_decode($gameValue, true);
-        $gameData['round'] = $newRound;
+        // Créer un userId unique pour le joueur
+        if (!$session->has('userID')) {
+            $userId = bin2hex(random_bytes(8));
+            $pseudo = 'Player' . random_int(1000, 9999);
 
-        $cookie = Cookie::create($gameId)
-            ->withValue(json_encode($gameData))
-            ->withExpires(new \DateTime('+1 day')) // cookie valide 1 jour
-            ->withPath('/')
-            ->withHttpOnly(false);
-        return $cookie;
+            $session->set('userID', $userId);
+            $session->set('pseudo', $pseudo);
+        } else {
+            $userId = $session->get('userID');
+            $pseudo = $session->get('pseudo');
+        }
+
+        // Ajouter le joueur à la salle existante
+        $this->requetesRedis->addPartyUser($roomId, json_encode([
+            'id' => $userId,
+            'username' => $pseudo
+        ]));
+
+        $roomType = $this->requetesRedis->GetPartyType($roomId);
+        
+        $session->set('roomID', $roomId);
+        $session->set('round',0);
+
+        return [
+            'roomType' => $roomType,
+            'roomId' => $roomId,
+            'userID' => $userId,
+            'pseudo' => $pseudo
+        ];
     }
 
-    public function getGameRound(string $gameId, Request $request): ?int
+    public function getPlayersInGame(string $roomId): array
     {
-        // On récupère le round de la game
-        $gameValue = $request->cookies->get($gameId);
-        $gameData = json_decode($gameValue, true);
-        return $gameData['round'];
+        $usersData = $this->requetesRedis->GetPartyUsers($roomId);
+        $players = [];
+
+        foreach ($usersData as $userData) {
+            $user = json_decode($userData, true);
+            if ($user) {
+                $this->nbPlayers+=1;
+                $players[] = [
+                    'id' => $user['id'],
+                    'username' => $user['username']
+                ];
+            }
+        }
+
+        return $players;
     }
 
+    public function getRound(SessionInterface $session):int{
+        if ($session->has('round')){
+            return $session->get('round');
+        } else {
+            $session->set('round',0);
+            return 0;
+        }
+    }
 
+    public function incrRound(SessionInterface $session):int{
+        $session->set('round',$session->get('round')+1);
+        return $session->get('round');
+    }
+
+    public function getNbPlayers():int{
+        return $this->nbPlayers;
+    }
 }

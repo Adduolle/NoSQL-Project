@@ -12,7 +12,7 @@
                     <li class="nav-items user-profile">
 
                         <a class="nav-link" href="/profile">
-                            <span class="user-name">{{user.nickname}}</span> 
+                            <span class="user-name">{{nickname}}</span> 
                         </a>
                         
                     </li>
@@ -28,30 +28,23 @@
                         
                         <div class="card tale-room-card shadow">
                             <div class="card-body">
-                                
-                                <h1 class="title-name">{{ story.title }}</h1>
+
+                                <h1 class="title-name" id="story-title"></h1>
 
                                 <div class="scrollable-content">
-                                    <div id="stories-created">
-                                        {% for player in story.players %}
-                                            <div class="story-item mb-3 p-3 {% if not loop.last %}border-bottom{% endif %}">
-                                                <h5 class="player-name">{{ player.name }}</h5>
-                                                <p class="story-text mb-0">
-                                                    {{ player.text }}
-                                                </p>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
+                                    <div id="stories-created"></div>
                                 </div>
-                                        
-                                
-                                    
-                                </div>   
-                                    <div class="text-center">
-                                        <button class="btn tale-room-btn">Voir suivant</button>
-                                    </div>
+
+                                <div class="text-center mt-3">
+                                    <button class="btn tale-room-btn" id="next-story">Voir suivant</button>
+                                </div>
+
                             </div>
                         </div>
+
+                        <script>
+                            const stories = {{ stories|json_encode|raw }};
+                        </script>
                         
                     </div>
                     
@@ -64,3 +57,45 @@
       
         
 {% endblock %}
+
+<script>
+    let currentIndex = 0;
+
+    const titleEl = document.getElementById('story-title');
+    const containerEl = document.getElementById('stories-created');
+    const nextBtn = document.getElementById('next-story');
+
+    function renderStory(index) {
+        const story = stories[index];
+
+        // Titre
+        titleEl.textContent = story.title;
+
+        // Contenu
+        containerEl.innerHTML = '';
+
+        story.players.forEach((player, i) => {
+            const div = document.createElement('div');
+            div.className = 'story-item mb-3 p-3' + (i < story.players.length - 1 ? ' border-bottom' : '');
+
+            div.innerHTML = `
+                <h5 class="player-name">${player.name}</h5>
+                <p class="story-text mb-0">${player.text}</p>
+            `;
+
+            containerEl.appendChild(div);
+        });
+    }
+    containerEl.classList.add('fade');
+    setTimeout(() => containerEl.classList.remove('fade'), 300);
+
+
+    // Bouton "suivant"
+    nextBtn.addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % stories.length;
+        renderStory(currentIndex);
+    });
+
+    // Initialisation
+    renderStory(currentIndex);
+</script>
