@@ -1,6 +1,0 @@
-pour lancer le serveur:
-    APP_ENV=testtwig php -S localhost:8000 -t public
-
-
-composer require symfony/asset
-php bin/console cache:clear
