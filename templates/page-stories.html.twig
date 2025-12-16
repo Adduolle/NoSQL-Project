@@ -31,7 +31,7 @@
                                 <div class="scrollable-content-stories">
                                     <div id="stories-created">
                                         <div class="story-item">
-                                            <p class="story-text">{{ assigned_text }}</p>
+                                            <p class="story-text">" {{ assigned_text }} "</p>
                                         </div>
                                     </div>
                                 </div>
@@ -76,10 +76,6 @@
     async function refresh() {
         try {
             console.log("Refreshing game status...");
-            console.log(scriptId)
-            console.log(content)
-            console.log(currentRound)
-            console.log(assigned_text)
             const response = await fetch(`/game_loop/${roomID}/status`);
             const data = await response.json();
             if (data.allPlayed) {
@@ -91,7 +87,6 @@
                 });
                 if (!recupResponse.ok) throw new Error('Erreur lors du POST du round');
                 const recupData = await recupResponse.json();
-                console.log("Passe le recupData:", recupData);
 
                 if (recupData.success) {
                     clearInterval(interval);
@@ -113,7 +108,7 @@
         document.getElementById('playerstorie').disabled = true;
         content = document.getElementById('playerstorie').value;
         fetch(`/game_loop/${roomID}/validRound`);
-        interval =  setInterval(refresh, 10000);
+        interval =  setInterval(refresh, 3000);
         refresh();
     });
     </script>

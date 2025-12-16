@@ -144,7 +144,7 @@ class Controller extends AbstractController
                 return $this->redirectToRoute('final_visual', ['gameId' => $gameId]);
             }
             else{
-                $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round);
+                $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round - 1);
                 $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound($scriptId);
                 $this->requetesRedis->setPlayedBackToZero($gameId);
                 $response = $this->render('page-stories.html.twig', [

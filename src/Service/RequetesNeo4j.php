@@ -167,13 +167,15 @@ class RequetesNeo4j
         $query = '
             MATCH (sc:Script {id: $scriptId})
             RETURN sc.content AS content
+            LIMIT 1
         ';
 
         $params = ['scriptId' => $scriptId];
         $result = $this->neo4j->run($query, $params);
 
         $record = $result->first();
-        return $record ? $record->get('content') : null;
+
+        return $record ? $record->get('content') : "Aucun texte assigné";
     }
 
 
