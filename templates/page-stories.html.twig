@@ -88,21 +88,41 @@
     const url = `/game_loop/${roomID}/status`;
 
     async function refresh() {
-        
-        try {
-            const response = await fetch(url);
-            console.log("Réponse reçue :", response);
-            const data = await response.json();
-            console.log("Données reçues :", data);
-            playersReady = data.allPlayed;
-            
-            if (playersReady){
-                window.location.href = `/game_loop/${roomID}/recup`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        playersReady = data.allPlayed;
+
+        if (playersReady) {
+            const recupResponse = await fetch(`/game_loop/${roomID}/recup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: content
+                })
+            });
+
+            if (!recupResponse.ok) {
+                throw new Error('Erreur lors de l’appel à /recup');
             }
+
+            const recupData = await recupResponse.json();
+
+
+            if (recupData.success) {
+                window.location.href = `/game_loop`;
+            } else {
+                console.error('Erreur lors de la sauvegarde du contenu', recupData);
+            }
+        }
         } catch (err) {
             console.error("Erreur lors du refresh des joueurs :", err);
         }
-    }
+        }
+
 
     document.getElementById('submitAnswer').addEventListener('click',()=>{
         const button = document.getElementById('submitAnswer');

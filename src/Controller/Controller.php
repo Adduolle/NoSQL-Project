@@ -180,20 +180,31 @@ class Controller extends AbstractController
         ]);
     }
 
-    #[Route('/game_loop/{gameId}/{content}/recup', name:'game_loop_recup')]
-    public function gameLoopRecup(string $gameId, string $content): Response
-    {            
-        $this->requetesRedis->setPlayedBackToZero($gameId);
+    #[Route('/game_loop/{gameId}/recup', name: 'game_loop_recup', methods: ['POST'])]
+    public function gameLoopRecup(string $gameId,Request $request): JsonResponse {
+            $data = json_decode($request->getContent(), true);
 
-        return $this->redirectToRoute('game_loop', [
-            'content' => $content,
-        ]);
-    }
+            if (!isset($data['content'])) {
+                return $this->json(['success' => false], 400);
+            }
 
-    #[Route('/game_loop/{gameId}/validRound', name:'game_loop_recup')]
-    public function validRound(string $gameId, SessionInterface $sessionInterface): void
+            $content = $data['content'];
+
+            // Exemple : stockage Redis
+            $this->requetesRedis->CreateScriptText($gameId, $content);
+
+            return $this->json([
+                'success' => true
+            ]);
+        }
+
+
+    #[Route('/game_loop/{gameId}/validRound', name:'game_loop_validround')]
+    public function validRound(string $gameId, SessionInterface $sessionInterface): Response
     {       
+        var_dump("validRound called");
         $userId = $sessionInterface->get('userID');     
         $this->requetesRedis->validRound($userId,$gameId);
+        return new Response();
     }
 }
