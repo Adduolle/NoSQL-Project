@@ -66,12 +66,17 @@
 
     <script>
     let content = '';
-    const roomID = '{{ roomID }}';
-    let currentRound = {{ round }};
+
+    const roomID = {{ roomID|json_encode|raw }};
+    let currentRound = {{ round|json_encode|raw }};
+    let scriptId = {{ scriptId|json_encode|raw }};
+    const userID = {{ userID|json_encode|raw }};
 
     async function refresh() {
         try {
             console.log("Refreshing game status...");
+            console.log(scriptId)
+            console.log(content)
             const response = await fetch(`/game_loop/${roomID}/status`);
             const data = await response.json();
             if (data.allPlayed) {
@@ -79,11 +84,14 @@
                 const recupResponse = await fetch(`/game_loop/${roomID}/${currentRound}/recup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: content })
+                    body: JSON.stringify({ content: content , scriptId: scriptId })
                 });
                 if (!recupResponse.ok) throw new Error('Erreur lors du POST du round');
                 const recupData = await recupResponse.json();
+                console.log("Passe le recupData:", recupData);
+
                 if (recupData.success) {
+                    clearInterval(interval);
                     currentRound++;
                     window.location.href = `/game_loop/${currentRound}`;
                 } else {
@@ -102,7 +110,7 @@
         document.getElementById('playerstorie').disabled = true;
         content = document.getElementById('playerstorie').value;
         fetch(`/game_loop/${roomID}/validRound`);
-        setInterval(refresh, 2000);
+        interval =  setInterval(refresh, 10000);
         refresh();
     });
     </script>

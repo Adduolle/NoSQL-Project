@@ -72,120 +72,103 @@ class RequetesNeo4j
         if (!$gameId || !$players) {
             return new Response("Missing gameId or players info", 400);
         }
-        
-        foreach ($players as $player) {
-            $player = json_decode($player, true);
+
+        // Décodage des joueurs
+        $decodedPlayers = array_map(fn($p) => json_decode($p, true), $players);
+
+        // Crée les stories et le premier script pour chaque joueur
+        foreach ($decodedPlayers as $player) {
             $playerId = $player['id'];
             $storyId = $gameId . '_story_' . $playerId;
 
             // Crée la story du joueur
-            $query = '
+            $queryStory = '
                 MATCH (g:Game {id: $gameId})
                 CREATE (s:Story {id: $storyId, createdAt: datetime()})
                 CREATE (g)-[:CONTAINS_STORY]->(s)
                 RETURN s
             ';
-            $params = [
+            $this->neo4j->run($queryStory, [
                 'gameId' => $gameId,
                 'storyId' => $storyId,
-            ];
-            $result = $this->neo4j->run($query, $params);
+            ]);
 
-            // Crée le premier script pour ce joueur
-            $scriptId=$storyId . '_script_' . $playerId;
-            $this->createFirstScript($playerId,$storyId, $storyId . '_script_' . $playerId);
-            $this->createOtherScripts($playerId,$storyId, $scriptId, $players);
+            // Premier script assigné au joueur propriétaire
+            $firstScriptId = $storyId . '_script_' . $playerId;
+            $this->createFirstScript($playerId, $storyId, $firstScriptId);
+
+            // Crée les scripts suivants pour chaque autre joueur
+            $this->createOtherScripts($storyId, $firstScriptId, $playerId, $decodedPlayers);
         }
+
         return new Response("Stories and scripts created in game $gameId");
     }
 
-    public function createFirstScript(string $playerId, string $storyId, string $scriptId): Response
+    public function createFirstScript(string $playerId, string $storyId, string $scriptId): void
     {
-        if (!$storyId || !$scriptId === null) {
-            return new Response("Missing storyId or scriptId", 400);
-        }
         $query = '
+            MATCH (u:User {id: $playerId})
             MATCH (s:Story {id: $storyId})
-            CREATE (sc:Script {
-                id: $scriptId,
-                createdAt: datetime()
-            })
+            CREATE (sc:Script {id: $scriptId,content: "", createdAt: datetime()})
             CREATE (sc)-[:FIRST_OF]->(s)
-            CREATE (u:User {id: $playerId})-[:ASSIGNED {content: "", createdAt: datetime()}]->(sc)
-            RETURN sc';
-        $params = [
-            'storyId' => $storyId,
-            'scriptId' => $scriptId,
-            'playerId' => $playerId,
-        ];
-        $result = $this->neo4j->run($query, $params);
-        return new Response("First script $scriptId created for story $storyId");
-    }
-
-    public function createOtherScripts(string $playerId, string $storyId, string $firstScriptId, array $players): Response
-    {
-        if (!$storyId || !$playerId || $players === null) {
-            return new Response("Missing storyId or scriptId", 400);
-        }
-
-        $query = '
-            MATCH (s:Story {id: $storyId})
-            MATCH (prev:Script {id: $prevScriptId})
-            CREATE (sc:Script {
-                id: $scriptId,
-                createdAt: datetime()
-            })
-            CREATE (prev)-[:NEXT]->(sc)
-            CREATE (u:User {id: $playerId})-[:ASSIGNED {content: "", createdAt: datetime()}]->(sc)
+            CREATE (u)-[:ASSIGNED { createdAt: datetime()}]->(sc)
             RETURN sc
         ';
-        $count = count($players);
-        $posPlayer = array_search($playerId, array_column($players, 'id'));
-        $prevScriptId = $firstScriptId;
-        for ($i=1; $i < $count; $i++) {
-            if ($posPlayer + $i < $count) {
-                $player = json_decode($players[$posPlayer + $i], true);
-                $nextId = $player['id'];
-            } else {
-                $player = json_decode($players[($posPlayer + $i) % $count], true);
-                $nextId = $player['id'];
-            }
-            $params = [
-                'prevScriptId' => $prevScriptId,
-                'storyId' => $storyId,
-                'scriptId' => $storyId . '_script_' . $nextId,
-                'playerId' => $playerId,
-            ];
-            $result = $this->neo4j->run($query, $params);
-            $prevScriptId = $storyId . '_script_' . $nextId;
-        }
-        return new Response("Scrips added to story $storyId");
+        $this->neo4j->run($query, [
+            'playerId' => $playerId,
+            'storyId' => $storyId,
+            'scriptId' => $scriptId,
+        ]);
     }
 
-    public function writeScript(string $scriptId, string $userId, string $text): Response
+    public function createOtherScripts(string $storyId, string $firstScriptId, string $ownerId, array $players): void
     {
+        $prevScriptId = $firstScriptId;
 
-        if (!$scriptId || !$userId || !$text) {
-            return new Response("Missing scriptId, userId or text", 400);
+        foreach ($players as $player) {
+            $playerId = $player['id'];
+
+            if ($playerId === $ownerId) continue; // on ne met pas le propriétaire dans sa propre story
+
+            $scriptId = $storyId . '_script_' . $playerId;
+
+            $query = '
+                MATCH (prev:Script {id: $prevScriptId})
+                MATCH (u:User {id: $playerId})
+                CREATE (sc:Script {id: $scriptId,content: "" ,createdAt: datetime()})
+                CREATE (prev)-[:NEXT]->(sc)
+                CREATE (u)-[:ASSIGNED {createdAt: datetime()}]->(sc)
+                RETURN sc
+            ';
+            $this->neo4j->run($query, [
+                'prevScriptId' => $prevScriptId,
+                'scriptId' => $scriptId,
+                'storyId' => $storyId,
+                'playerId' => $playerId,
+            ]);
+
+            $prevScriptId = $scriptId;
+        }
+    }
+
+
+    public function writeScript(string $scriptId, string $text): Response
+    {
+        if (!$scriptId || !$text) {
+            return new Response("Missing scriptId or text", 400);
         }
 
         $query = '
-            MATCH (sc:Script {id: $scriptId})
-            MATCH (u:User {id: $userId})
-            CREATE (u)-[a:ASSIGNED {content: $text,createdAt: datetime()}]->(sc)
-            RETURN a
+            MATCH (sc:Script {id: "$scriptId"})
+            SET sc.content = "$text", sc.updatedAt = datetime()
+            RETURN sc
         ';
 
-        $params = [
-            'scriptId' => $scriptId,
-            'userId' => $userId,
-            'text' => $text,
-        ];
+        $this->neo4j->run($query, ['scriptId' => $scriptId, 'text' => $text]);
 
-        $this->neo4j->run($query, $params);
-
-        return new Response("Script $scriptId sent by user $userId");
+        return new Response("Script $scriptId updated");
     }
+
 
     public function getAssignedTextForPlayerInRound(string $gameId, string $userId, int $round): ?string
     {
@@ -196,8 +179,10 @@ class RequetesNeo4j
         $query = '
             MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(s:Story)<-[:FIRST_OF]-(firstScript:Script)
             MATCH path = (firstScript)-[:NEXT*' . $round . ']->(targetScript:Script)
-            MATCH (u:User {id: $userId})-[a:ASSIGNED]->(targetScript)<-[:NEXT]-(textScript:Script)<-[assText:ASSIGNED]-(writer:User)
-            RETURN assText.content AS content
+            MATCH (writer:User)-[:ASSIGNED]->(targetScript)
+            WHERE writer.id <> $userId
+            RETURN targetScript.content AS content
+            LIMIT 1
         ';
 
         $params = [
@@ -206,31 +191,68 @@ class RequetesNeo4j
         ];
 
         $result = $this->neo4j->run($query, $params);
-        $record = $result->getRecord();
 
+        // Récupérer le premier record
+        $record = $result->first(); // <-- Utiliser first() au lieu de getRecord()
         return $record ? $record->get('content') : null;
     }
 
-    public function getStories(string $gameId):array{
+
+    public function getScriptIdForPlayerInRound(string $gameId, string $userId, int $round): ?string
+    {
+        if (!$gameId || !$userId || $round < 0) {
+            return null;
+        }
+
         $query = '
-                MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(s:Story)
-                MATCH (s)<-[:FIRST_OF]-(first:Script)
-                MATCH path = (first)-[:NEXT*0..]->(sc:Script)
-                MATCH (sc)-[a:ASSIGNED]->(u:User)
+            MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(s:Story)<-[:FIRST_OF]-(firstScript:Script)
+            MATCH path = (firstScript)-[:NEXT*' . $round . ']->(targetScript:Script)
+            MATCH (u:User {id: $userId})-[a:ASSIGNED]->(targetScript)
+            RETURN targetScript.id AS scriptId
+        ';
 
-                WITH s, sc, u, a, length(path) AS position
-                ORDER BY s, position
+        $params = [
+            'gameId' => $gameId,
+            'userId' => $userId,
+        ];
 
-                WITH s,
-                    collect({name:u.name, text:a.content}) AS playersTexts
+        $result = $this->neo4j->run($query, $params);
 
-                RETURN collect({
-                    title: s.title,
-                    players: playersTexts
-                }) AS stories';
+        if ($result->count() === 0) {
+            return null;
+        }
+
+        $record = $result->first();
+
+        return $record->get('scriptId');
+    }
+
+
+    public function getStories(string $gameId): array {
+        $query = '
+            MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(s:Story)
+            MATCH (s)<-[:FIRST_OF]-(first:Script)
+            MATCH path = (first)-[:NEXT*0..]->(sc:Script)
+            MATCH (sc)-[a:ASSIGNED]->(u:User)
+            WITH s, sc, u, a, length(path) AS position
+            ORDER BY s, position
+            WITH s,
+                collect({name:u.name, text:a.content}) AS playersTexts
+            RETURN collect({
+                title: s.title,
+                players: playersTexts
+            }) AS stories
+        ';
         $params = ['gameId' => $gameId];
         $result = $this->neo4j->run($query, $params);
-        return $result;
+
+        // Convertit le CypherList en array PHP
+        $records = $result->first(); // récupère le premier enregistrement
+        if ($records === null) return [];
+
+        $stories = $records->get('stories');
+        return $stories->toArray(); // <-- conversion en array PHP
     }
+
 
 }

@@ -114,46 +114,6 @@ class RequetesRedis
         $this->redis->delete("party:$idParty:players");
     }
 
-    // Gestion des rounds
-    public function createRounds(string $idUser, array $idRounds): void
-    {
-        $key = "rounds:$idUser";
-        $this->redis->delete($key);
-        foreach ($idRounds as $round) {
-            $this->redis->lPush($key, $round);
-        }
-    }
-
-    public function getRound(string $idUser): ?string
-    {
-        return $this->redis->get("actual_round:$idUser") ?: null;
-    }
-
-    public function getRounds(string $idUser): array
-    {
-        return $this->redis->lRange("rounds:$idUser", 0, -1) ?: [];
-    }
-
-    public function deleteRounds(string $idUser): void
-    {
-        $this->redis->delete("rounds:$idUser");
-    }
-
-    // Gestion des textes des scripts
-    public function createScriptText(string $idScript, string $texte): void
-    {
-        $this->redis->set("script:$idScript", $texte);
-    }
-
-    public function getScriptText(string $idScript): ?string
-    {
-        return $this->redis->get("script:$idScript") ?: null;
-    }
-
-    public function deleteScriptText(string $idScript): void
-    {
-        $this->redis->delete("script:$idScript");
-    }
 
     public function getNickname(string $userId, string $idParty):string
     {

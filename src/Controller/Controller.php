@@ -130,7 +130,7 @@ class Controller extends AbstractController
     }
 
     #[Route('/game_loop/{round}', name: 'game_loop', methods: ['POST','GET'])]
-    public function gameLoop(Request $request, SessionInterface $sessionInterface, int $round, ?string $content): Response
+    public function gameLoop(Request $request, SessionInterface $sessionInterface, int $round): Response
     {
         $userId = $sessionInterface->get('userID');
         $gameId = $sessionInterface->get('roomID');
@@ -138,34 +138,9 @@ class Controller extends AbstractController
 
         $gameRound = $round;
 
-        if (isset($content)) {
-            $this->requetesNeo4j->writeScript(
-                $gameId."_story_".$gameRound."_script_".$gameRound,
-                $userId,
-                $content
-            );
-
-            if ($gameRound < $this->gameManager->getNbPlayers()) {
-                $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound(
-                    $gameId, $userId, $gameRound
-                );
-
-                $response = $this->render('page-stories.html.twig', [
-                    'round' => $gameRound,
-                    'nickname' => $nickname,
-                    'assigned_text' => $assignedTxt,
-                    'roomID' => $gameId
-                ]);
-            } else {
-                $response = $this->render('page-stories.html.twig', [
-                    'round' => $gameRound,
-                    'nickname' => $nickname,
-                    'assigned_text' => 'Aucun texte assigné',
-                    'roomID' => $gameId
-                ]);
-            }
-
-            if ($gameRound >= $this->gameManager->getNbPlayers()) {
+        if ($round > 0){
+            
+            if ($round >= count($this->gameManager->getPlayersInGame($gameId))) {
                 $resultat = $this->requetesNeo4j->getStories($gameId);
                 return $this->render('resultat-histoire.html.twig', [
                     'nickname' => $nickname,
@@ -173,15 +148,30 @@ class Controller extends AbstractController
                     'roomID' => $gameId
                 ]);
             }
+            else{
+                $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound($gameId, $userId, $round);
+                $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round);
+                $response = $this->render('page-stories.html.twig', [
+                    'round' => $round,
+                    'nickname' => $nickname,
+                    'assigned_text' => $assignedTxt,
+                    'roomID' => $gameId,
+                    'scriptId' => $scriptId,
+                    'userID' => $userId
+                ]);
+            }
             return $response;
         }
 
         // First round si GET sans contenu
+        $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round);
         return $this->render('page-stories.html.twig', [
-            'round' => $gameRound,
+            'round' => $round,
             'nickname' => $nickname,
             'assigned_text' => '',
-            'roomID' => $gameId
+            'roomID' => $gameId,
+            'scriptId' => $scriptId,
+            'userID' => $userId
         ]);
     }
 
@@ -196,21 +186,24 @@ class Controller extends AbstractController
         ]);
     }
 
+    //data = {content: "texte du joueur", scriptId: "id du script"}
     #[Route('/game_loop/{gameId}/{round}/recup', name: 'game_loop_recup', methods: ['POST'])]
-    public function gameLoopRecup(string $gameId, int $round, Request $request): JsonResponse {
+    public function gameLoopRecup(string $gameId, int $round, Request $request, SessionInterface $sessionInterface): JsonResponse {
         $data = json_decode($request->getContent(), true);
-
         if (!isset($data['content'])) {
             return $this->json(['success' => false], 400);
         }
 
         $content = $data['content'];
+        $scriptId = $data['scriptId'] ?? null;
 
-        $this->requetesRedis->CreateScriptText($gameId, $content);
+        if($scriptId === null){
+            return $this->json(['success' => false], 400);
+        }
+        
+        $this->requetesNeo4j->writeScript($scriptId, $content);
 
-        return $this->json([
-            'success' => true
-        ]);
+        return $this->json(['success' => true]);
     }
 
 
