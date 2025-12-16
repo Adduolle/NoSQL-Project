@@ -96,8 +96,7 @@
             .then(data => {
                 console.log(data.started);
                 if (data.started) {
-                    // Redirige vers la page de jeu
-                    window.location.href = `/game_loop`;
+                    window.location.href = `/game_loop/0`;
                 }
             })
             .catch(err => console.error(err));

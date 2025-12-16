@@ -73,18 +73,15 @@ class RequetesRedis
     {
         $key = "party:$idParty:players";
 
-        // Récupérer les joueurs existants
         $players = $this->GetPartyUsers($idParty);
 
-        // Vérifier si le joueur est déjà présent
         foreach ($players as $p) {
             $existing = json_decode($p, true);
             if ($existing['id'] === json_decode($User, true)['id']) {
-                return; // déjà présent, on n'ajoute pas
+                return; 
             }
         }
 
-        // Ajouter à la fin pour que l'host reste le premier
         $this->redis->rPush($key, $User);
     }
 
@@ -129,7 +126,7 @@ class RequetesRedis
 
     public function getRound(string $idUser): ?string
     {
-        return $this->redis->get("acutal_round:$idUser") ?: null;
+        return $this->redis->get("actual_round:$idUser") ?: null;
     }
 
     public function getRounds(string $idUser): array

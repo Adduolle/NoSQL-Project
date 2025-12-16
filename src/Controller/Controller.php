@@ -126,49 +126,65 @@ class Controller extends AbstractController
         $this->requetesNeo4j->createStories($roomId, $players);
         $this->requetesRedis->startGame($roomId);
         // lancer la route game_loop
-        return $this->redirectToRoute('game_loop');
+        return $this->redirectToRoute('game_loop', ['round' => 0]);
     }
 
-    #[Route('/game_loop', name: 'game_loop', methods: ['POST','GET'])]
-    public function gameLoop(Request $request, SessionInterface $sessionInterface, ?string $content): Response
+    #[Route('/game_loop/{round}', name: 'game_loop', methods: ['POST','GET'])]
+    public function gameLoop(Request $request, SessionInterface $sessionInterface, int $round, ?string $content): Response
     {
-        // On récup le joueur actuel
         $userId = $sessionInterface->get('userID');
-        // On récup le round
         $gameId = $sessionInterface->get('roomID');
-        $nickname = $this->requetesRedis->getNickname($userId,$gameId);
-        $gameRound=$this->gameManager->incrRound($sessionInterface)-1;
+        $nickname = $this->requetesRedis->getNickname($userId, $gameId);
 
-        if (isset($content)){
-            // Neo4j
-            $this->requetesNeo4j->writeScript($gameId."_story_".$gameRound."_script_".$gameRound,$userId,$content);
+        $gameRound = $round;
 
-            if (!$gameRound>=$this->gameManager->getNbPlayers()){
-                // Récupérer le nouveau texte selon le round et l'id du joueur
-                $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound($gameId, $userId, $gameRound);
-                // Préparer la réponse
-                $response =$this->render('page-stories.html.twig', ['round'=>$gameRound,
-                    'nickname'=>$nickname,'assigned_text'=>$assignedTxt, 'roomID'=>$gameId]);
+        if (isset($content)) {
+            $this->requetesNeo4j->writeScript(
+                $gameId."_story_".$gameRound."_script_".$gameRound,
+                $userId,
+                $content
+            );
+
+            if ($gameRound < $this->gameManager->getNbPlayers()) {
+                $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound(
+                    $gameId, $userId, $gameRound
+                );
+
+                $response = $this->render('page-stories.html.twig', [
+                    'round' => $gameRound,
+                    'nickname' => $nickname,
+                    'assigned_text' => $assignedTxt,
+                    'roomID' => $gameId
+                ]);
             } else {
-                $response=$this->render('page-stories.html.twig', ['round'=>$gameRound,
-                    'nickname'=>$nickname,'assigned_text'=>'Aucun texte assigné', 'roomID'=>$gameId]);
-                return $response;
+                $response = $this->render('page-stories.html.twig', [
+                    'round' => $gameRound,
+                    'nickname' => $nickname,
+                    'assigned_text' => 'Aucun texte assigné',
+                    'roomID' => $gameId
+                ]);
             }
-            // Logique de endgame
-            if ($gameRound>=$this->gameManager->getNbPlayers()){
-                $resultat=$this->requetesNeo4j->getStories($gameId);
-                $response =$this->render('resultat-histoire.html.twig', [
-                    'nickname'=>$nickname,'stories'=>$resultat, 'roomID'=>$gameId]);
-                return $response;
+
+            if ($gameRound >= $this->gameManager->getNbPlayers()) {
+                $resultat = $this->requetesNeo4j->getStories($gameId);
+                return $this->render('resultat-histoire.html.twig', [
+                    'nickname' => $nickname,
+                    'stories' => $resultat,
+                    'roomID' => $gameId
+                ]);
             }
             return $response;
         }
 
-        // Définir la vue du first round
-        $response = $this->render('page-stories.html.twig', ['round'=>'0',
-                'nickname'=>$nickname,'assigned_text'=>'', 'roomID'=>$gameId]);
-        return $response;
+        // First round si GET sans contenu
+        return $this->render('page-stories.html.twig', [
+            'round' => $gameRound,
+            'nickname' => $nickname,
+            'assigned_text' => '',
+            'roomID' => $gameId
+        ]);
     }
+
 
     #[Route('/game_loop/{id}/status', name: 'game_loop_status')]
     public function gameLoopStatus(string $id): JsonResponse
@@ -180,29 +196,27 @@ class Controller extends AbstractController
         ]);
     }
 
-    #[Route('/game_loop/{gameId}/recup', name: 'game_loop_recup', methods: ['POST'])]
-    public function gameLoopRecup(string $gameId,Request $request): JsonResponse {
-            $data = json_decode($request->getContent(), true);
+    #[Route('/game_loop/{gameId}/{round}/recup', name: 'game_loop_recup', methods: ['POST'])]
+    public function gameLoopRecup(string $gameId, int $round, Request $request): JsonResponse {
+        $data = json_decode($request->getContent(), true);
 
-            if (!isset($data['content'])) {
-                return $this->json(['success' => false], 400);
-            }
-
-            $content = $data['content'];
-
-            // Exemple : stockage Redis
-            $this->requetesRedis->CreateScriptText($gameId, $content);
-
-            return $this->json([
-                'success' => true
-            ]);
+        if (!isset($data['content'])) {
+            return $this->json(['success' => false], 400);
         }
+
+        $content = $data['content'];
+
+        $this->requetesRedis->CreateScriptText($gameId, $content);
+
+        return $this->json([
+            'success' => true
+        ]);
+    }
 
 
     #[Route('/game_loop/{gameId}/validRound', name:'game_loop_validround')]
     public function validRound(string $gameId, SessionInterface $sessionInterface): Response
     {       
-        var_dump("validRound called");
         $userId = $sessionInterface->get('userID');     
         $this->requetesRedis->validRound($userId,$gameId);
         return new Response();
