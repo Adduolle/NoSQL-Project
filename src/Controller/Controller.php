@@ -149,7 +149,7 @@ class Controller extends AbstractController
                 ]);
             }
             else{
-                $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round);
+                $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round - 1);
                 $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound($scriptId);
                 $this->requetesRedis->setPlayedBackToZero($gameId);
                 $response = $this->render('page-stories.html.twig', [
