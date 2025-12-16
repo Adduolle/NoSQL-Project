@@ -216,30 +216,24 @@ class RequetesNeo4j
     }
 
 
-    public function getStories(string $gameId): array {
+    public function getStories(string $gameId):object{
         $query = '
-            MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(s:Story)
-            MATCH (s)<-[:FIRST_OF]-(first:Script)
-            MATCH path = (first)-[:NEXT*0..]->(sc:Script)
-            MATCH (sc)-[a:ASSIGNED]->(u:User)
-            WITH s, sc, u, a, length(path) AS position
-            ORDER BY s, position
-            WITH s,
-                collect({name:u.name, text:a.content}) AS playersTexts
-            RETURN collect({
-                title: s.title,
-                players: playersTexts
-            }) AS stories
-        ';
+            MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(story:Story)<-[:FIRST_OF]-(first:Script)
+            MATCH path = (first)-[:NEXT*0..]->(script:Script)
+            MATCH (script)<-[a:ASSIGNED]-(u:User)
+            WITH story, script, length(path) AS position, u, a
+            ORDER BY story.id, position
+            WITH story.id AS storyId, collect({
+                scriptId: script.id,
+                playerName: u.name,
+                text: script.content
+            }) AS scripts
+            RETURN storyId, scripts
+            ORDER BY storyId';
+
         $params = ['gameId' => $gameId];
         $result = $this->neo4j->run($query, $params);
-
-        // Convertit le CypherList en array PHP
-        $records = $result->first(); // récupère le premier enregistrement
-        if ($records === null) return [];
-
-        $stories = $records->get('stories');
-        return $stories->toArray(); // <-- conversion en array PHP
+        return $result;
     }
 
 
