@@ -222,11 +222,8 @@ class Controller extends AbstractController
         return new Response();
     }
 
-    #[Route('/testneo4j', name:'testneo4j')]
-    public function testneo4j(){
-
-        
-        
+    #[Route('/final_visual/{gameId}', name:'final_visual')]
+    public function final_visual(string $gameId){
         /*$players = [
             '{"id":"test_0"}',
             '{"id":"test_1"}',
@@ -263,7 +260,7 @@ class Controller extends AbstractController
         $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_1','test_1','Suite 1 histoire 3');
         $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_2','test_2','Suite 2 histoire 3');*/
         
-        $results = $this->requetesNeo4j->getStories('game_test_0')->toArray();
+        $results = $this->requetesNeo4j->getStories('game_test_0')->toArray(); //remplacer par gameId !!!!!!!!!!!!!!
         $stories=[];
         foreach ($results as $record) {
             $storyId = $record->get('storyId');
