@@ -71,12 +71,15 @@
     let currentRound = {{ round|json_encode|raw }};
     let scriptId = {{ scriptId|json_encode|raw }};
     const userID = {{ userID|json_encode|raw }};
+    const assigned_text = {{ assigned_text|json_encode|raw }};
 
     async function refresh() {
         try {
             console.log("Refreshing game status...");
             console.log(scriptId)
             console.log(content)
+            console.log(currentRound)
+            console.log(assigned_text)
             const response = await fetch(`/game_loop/${roomID}/status`);
             const data = await response.json();
             if (data.allPlayed) {

@@ -147,8 +147,8 @@ class RequetesNeo4j
         }
 
         $query = '
-            MATCH (sc:Script {id: "$scriptId"})
-            SET sc.content = "$text", sc.updatedAt = datetime()
+            MATCH (sc:Script {id: $scriptId})
+            SET sc.content = $text, sc.updatedAt = datetime()
             RETURN sc
         ';
 
@@ -158,32 +158,24 @@ class RequetesNeo4j
     }
 
 
-    public function getAssignedTextForPlayerInRound(string $gameId, string $userId, int $round): ?string
+    public function getAssignedTextForPlayerInRound(string $scriptId): ?string
     {
-        if (!$gameId || !$userId || $round < 0) {
+        if (!$scriptId) {
             return 'Aucun texte assigné';
         }
 
         $query = '
-            MATCH (g:Game {id: $gameId})-[:CONTAINS_STORY]->(s:Story)<-[:FIRST_OF]-(firstScript:Script)
-            MATCH path = (firstScript)-[:NEXT*' . $round . ']->(targetScript:Script)
-            MATCH (writer:User)-[:ASSIGNED]->(targetScript)
-            WHERE writer.id <> $userId
-            RETURN targetScript.content AS content
-            LIMIT 1
+            MATCH (sc:Script {id: $scriptId})
+            RETURN sc.content AS content
         ';
 
-        $params = [
-            'gameId' => $gameId,
-            'userId' => $userId,
-        ];
-
+        $params = ['scriptId' => $scriptId];
         $result = $this->neo4j->run($query, $params);
 
-        // Récupérer le premier record
-        $record = $result->first(); // <-- Utiliser first() au lieu de getRecord()
+        $record = $result->first();
         return $record ? $record->get('content') : null;
     }
+
 
 
     public function getScriptIdForPlayerInRound(string $gameId, string $userId, int $round): ?string
@@ -197,6 +189,7 @@ class RequetesNeo4j
             MATCH path = (firstScript)-[:NEXT*' . $round . ']->(targetScript:Script)
             MATCH (u:User {id: $userId})-[a:ASSIGNED]->(targetScript)
             RETURN targetScript.id AS scriptId
+            LIMIT 1
         ';
 
         $params = [
@@ -205,15 +198,11 @@ class RequetesNeo4j
         ];
 
         $result = $this->neo4j->run($query, $params);
-
-        if ($result->count() === 0) {
-            return null;
-        }
-
         $record = $result->first();
 
-        return $record->get('scriptId');
+        return $record ? $record->get('scriptId') : null;
     }
+
 
 
     public function getStories(string $gameId):object{

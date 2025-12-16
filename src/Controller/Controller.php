@@ -149,8 +149,8 @@ class Controller extends AbstractController
                 ]);
             }
             else{
-                $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound($gameId, $userId, $round);
                 $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round);
+                $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound($scriptId);
                 $response = $this->render('page-stories.html.twig', [
                     'round' => $round,
                     'nickname' => $nickname,
