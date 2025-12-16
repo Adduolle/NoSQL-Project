@@ -41,10 +41,6 @@
 
                             </div>
                         </div>
-
-                        <script>
-                            const stories = {{ stories|json_encode|raw }};
-                        </script>
                         
                     </div>
                     
@@ -54,33 +50,28 @@
             
         </main>
 
-      
-        
-{% endblock %}
-
 <script>
     let currentIndex = 0;
-
+    const stories = JSON.parse('{{ stories|e('js') }}');
+    const storiesArray = Object.values(stories);
+    console.log(storiesArray);
     const titleEl = document.getElementById('story-title');
     const containerEl = document.getElementById('stories-created');
     const nextBtn = document.getElementById('next-story');
 
     function renderStory(index) {
-        const story = stories[index];
+        const story = storiesArray[index];
+        console.log(story);
 
-        // Titre
-        titleEl.textContent = story.title;
-
-        // Contenu
+        titleEl.textContent = "Histoire n°".index;
         containerEl.innerHTML = '';
-
-        story.players.forEach((player, i) => {
+        story.forEach((script, i) => {
             const div = document.createElement('div');
-            div.className = 'story-item mb-3 p-3' + (i < story.players.length - 1 ? ' border-bottom' : '');
+            div.className = 'story-item mb-3 p-3';
 
             div.innerHTML = `
-                <h5 class="player-name">${player.name}</h5>
-                <p class="story-text mb-0">${player.text}</p>
+                <h5 class="player-name">${script.name}</h5>
+                <p class="story-text mb-0">${script.text}</p>
             `;
 
             containerEl.appendChild(div);
@@ -92,10 +83,14 @@
 
     // Bouton "suivant"
     nextBtn.addEventListener('click', () => {
-        currentIndex = (currentIndex + 1) % stories.length;
+        currentIndex = (currentIndex + 1);
         renderStory(currentIndex);
     });
 
     // Initialisation
     renderStory(currentIndex);
-</script>
+</script>      
+        
+{% endblock %}
+
+

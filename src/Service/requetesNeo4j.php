@@ -16,7 +16,6 @@ class RequetesNeo4j
 
     public function createUser(string $userId, string $name): Response
     {
-
         if (!$userId || !$name) {
             return new Response("Missing userId or name", 400);
         }
@@ -36,35 +35,24 @@ class RequetesNeo4j
         return new Response("User $name created");
     }
 
-    public function createGame(string $gameId, string $roomType, array $players): Response
+    public function createGame(string $gameId, string $roomType): Response
     {
-        if (!$gameId || !$players) {
+        if (!$gameId) {
             return new Response("Missing gameId or userIds[]", 400);
         }
 
         $query = '
-            WITH $gameId AS gameId, $userIds AS userIds
-            CREATE (g:Game {id: gameId, createdAt: datetime()})
-            WITH g, userIds
-            UNWIND userIds AS uid
-            MATCH (u:User {id: uid})
-            CREATE (u)-[:PARTICIPATE_TO]->(g)
-            RETURN g, collect(u) AS participants
+            CREATE (g:Game {id: $gameId, createdAt: datetime()})
+            RETURN g
         ';
-        $userIds=[];
-        foreach ($players as $player){
-            $player = json_decode($player, true);
-            $userIds[]=$player['id'];
-        }
 
         $params = [
             'gameId' => $gameId,
-            'userIds' => $userIds
         ];
 
         $result = $this->neo4j->run($query, $params);
 
-        return new Response("Game $gameId created with players: " . implode(',', $userIds));
+        return new Response("Game $gameId created");
     }
 
     public function createStories(string $gameId, array $players): Response
