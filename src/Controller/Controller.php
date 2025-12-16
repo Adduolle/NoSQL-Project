@@ -181,14 +181,11 @@ class Controller extends AbstractController
     }
 
     #[Route('/game_loop/{gameId}/{content}/recup', name:'game_loop_recup')]
-    public function gameLoopRecup(string $gameId, string $content): JsonResponse
+    public function gameLoopRecup(string $gameId, string $content): Response
     {            
         $this->requetesRedis->setPlayedBackToZero($gameId);
 
-        // Retourne un JSON indiquant que l'action est faite
-        return $this->json([
-            'success' => true,
-            'gameId' => $gameId,
+        return $this->redirectToRoute('game_loop', [
             'content' => $content,
         ]);
     }

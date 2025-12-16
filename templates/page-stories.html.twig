@@ -97,15 +97,7 @@
             playersReady = data.allPlayed;
             
             if (playersReady){
-                const response = await fetch(`/game_loop/${gameId}/${content}/recup`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    content=data.content;
-                    window.location.href = `/game_loop/`;
-                } else {
-                    console.error('Impossible de réinitialiser les joueurs', data);
-                }
+                window.location.href = `/game_loop/${roomID}/recup`;
             }
         } catch (err) {
             console.error("Erreur lors du refresh des joueurs :", err);
