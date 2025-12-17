@@ -91,6 +91,7 @@
                 if (recupData.success) {
                     clearInterval(interval);
                     currentRound++;
+                    await fetch(`/game_loop/${roomID}/next`);
                     window.location.href = `/game_loop/${currentRound}`;
                 } else {
                     console.error('Erreur lors de la sauvegarde du contenu', recupData);
@@ -108,7 +109,7 @@
         document.getElementById('playerstorie').disabled = true;
         content = document.getElementById('playerstorie').value;
         fetch(`/game_loop/${roomID}/validRound`);
-        interval =  setInterval(refresh, 3000);
+        interval =  setInterval(refresh, 10000);
         refresh();
     });
     </script>

@@ -52,6 +52,18 @@ class RequetesRedis
         return true;
     }
 
+    public function incrRoundCounter(string $gameId): int
+    {
+        return $this->redis->incr("party:$gameId:round_counter");
+    }
+
+    public function resetRound(string $gameId): void
+    {
+        $this->redis->set("party:$gameId:round_counter", 0);
+        $this->setPlayedBackToZero($gameId);
+    }
+
+
     public function setPlayedBackToZero(string $gameId): void {
         $players = $this->getPartyUsers($gameId);
         foreach ($players as $player) {

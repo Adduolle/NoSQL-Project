@@ -141,10 +141,15 @@ class Controller extends AbstractController
         if ($round > 0){
             
             if ($round >= count($this->gameManager->getPlayersInGame($gameId))) {
-                return $this->redirectToRoute('final_visual', ['gameId' => $gameId]);
+                $resultat = $this->requetesNeo4j->getStories($gameId);
+                return $this->render('resultat-histoire.html.twig', [
+                    'nickname' => $nickname,
+                    'stories' => $resultat,
+                    'roomID' => $gameId
+                ]);
             }
             else{
-                $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round - 1);
+                $scriptId = $this->requetesNeo4j->getScriptIdForPlayerInRound($gameId, $userId, $round);
                 $assignedTxt = $this->requetesNeo4j->getAssignedTextForPlayerInRound($scriptId);
                 $this->requetesRedis->setPlayedBackToZero($gameId);
                 $response = $this->render('page-stories.html.twig', [
@@ -249,7 +254,7 @@ class Controller extends AbstractController
         $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_1','test_1','Suite 1 histoire 3');
         $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_2','test_2','Suite 2 histoire 3');*/
         
-        $results = $this->requetesNeo4j->getStories($gameId)->toArray(); //remplacer par gameId !!!!!!!!!!!!!!
+        $results = $this->requetesNeo4j->getStories('game_test_0')->toArray(); //remplacer par gameId !!!!!!!!!!!!!!
         $stories=[];
         foreach ($results as $record) {
             $storyId = $record->get('storyId');

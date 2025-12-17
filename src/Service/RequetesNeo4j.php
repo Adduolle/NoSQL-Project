@@ -165,8 +165,8 @@ class RequetesNeo4j
         }
 
         $query = '
-            MATCH (sc:Script {id: $scriptId})
-            RETURN sc.content AS content
+            MATCH (sc:Script {id: $scriptId})<-[:NEXT]-(prev:Script)
+            RETURN prev.content AS content
             LIMIT 1
         ';
 
