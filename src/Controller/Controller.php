@@ -279,4 +279,67 @@ class Controller extends AbstractController
             'stories'=>json_encode($stories),
         ]);
     }
+    #[Route('/test_final', name:'test_final')]
+    public function test_final(){
+        $players = [
+            '{"id":"test_0"}',
+            '{"id":"test_1"}',
+            '{"id":"test_2"}',
+            '{"id":"test_3"}',
+        ];
+        foreach ($players as $playerJson) {
+            $player = json_decode($playerJson, true);
+            $id = $player['id'];
+            $name = $player['id'];
+
+            $this->requetesNeo4j->createUser($id, $name);
+        }
+        $gameId = 'game_test_0';
+        $this->requetesNeo4j->createGame($gameId, "normal");
+        $this->requetesNeo4j->createStories('game_test_0',$players);
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_0_script_test_0','test_0','Début histoire 0');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_0_script_test_1','test_1','Suite 1 histoire 0');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_0_script_test_2','test_2','Suite 2 histoire 0');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_0_script_test_3','test_3','Suite 3 histoire 0');
+
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_1_script_test_1','test_1','Début histoire 1');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_1_script_test_2','test_2','Suite 2 histoire 1');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_1_script_test_3','test_3','Suite 3 histoire 1');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_1_script_test_0','test_0','Suite 0 histoire 1');
+
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_2_script_test_2','test_2','Début histoire 2');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_2_script_test_3','test_3','Suite 3 histoire 2');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_2_script_test_0','test_0','Suite 0 histoire 2');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_2_script_test_1','test_1','Suite 1 histoire 2');
+
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_3','test_3','Début histoire 3');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_0','test_0','Suite 0 histoire 3');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_1','test_1','Suite 1 histoire 3');
+        $this->requetesNeo4j->writeScript('game_test_0_story_test_3_script_test_2','test_2','Suite 2 histoire 3');
+        
+        $results = $this->requetesNeo4j->getStories('game_test_0')->toArray();
+        $stories=[];
+        foreach ($results as $record) {
+            $storyId = $record->get('storyId');
+            $scriptsList = $record->get('scripts');
+            $scripts = [];
+            foreach ($scriptsList as $scriptMap) {
+                $scripts[] = $scriptMap->toArray();          // transforme CypherMap en tableau PHP
+            }
+            $order=0;
+            foreach ($scripts as $script) {
+                $stories[$storyId][$order] = [
+                'scriptId' => $script['scriptId'],
+                'name' => $script['playerName'],
+                'text' => $script['text']
+                ];
+                $order+=1;
+            }
+        }
+            
+        return $this->render('resultat-histoire.html.twig', [
+            'nickname'=>'Test nickname',
+            'stories'=>json_encode($stories),
+        ]);
+    }
 }
